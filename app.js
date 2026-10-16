@@ -2,7 +2,7 @@ const { createApp, ref, computed, onMounted, watch, nextTick } = Vue;
 
 createApp({
   setup() {
-    const currentView = ref('projects');
+    const currentView = ref('guide'); // Default to guide/intro
     const selectedProject = ref(null);
     const searchQuery = ref('');
 
@@ -23,7 +23,6 @@ createApp({
     const serialLogs = ref([]);
     const serialInputText = ref('');
     let serialPort = null;
-    let serialReader = null;
 
     // Calculator states
     const ohmsVolts = ref(5);
@@ -123,7 +122,7 @@ createApp({
     watch(manufacturingMethods, val => localStorage.setItem('maker_methods', JSON.stringify(val)), { deep: true });
     watch(shoppingList, val => localStorage.setItem('maker_shopping', JSON.stringify(val)), { deep: true });
 
-    // Calculator Computed Properties
+    // Calculators
     const calculatedAmps = computed(() => {
       if (!ohmsResistance.value || ohmsResistance.value === 0) return 0;
       return (ohmsVolts.value / ohmsResistance.value).toFixed(2);
@@ -152,10 +151,10 @@ createApp({
       }
     };
 
-    // Web Serial API Implementation
+    // Web Serial API
     const connectSerial = async () => {
       if (!('serial' in navigator)) {
-        alert('Web Serial API is not supported in this browser. Try Google Chrome or Microsoft Edge.');
+        alert('Web Serial API is not supported in this browser.');
         return;
       }
       try {
@@ -164,7 +163,6 @@ createApp({
         serialConnected.value = true;
         serialLogs.value.push('[System] Connected successfully to serial port.');
 
-        // Read loop
         while (serialPort.readable && serialConnected.value) {
           const textDecoder = new TextDecoderStream();
           const readableStreamClosed = serialPort.readable.pipeTo(textDecoder.writable);
@@ -205,7 +203,7 @@ createApp({
       writer.releaseLock();
     };
 
-    // Drag and Drop & Completion Animation Trigger
+    // Drag and Drop & Strict Completion Animation Check
     const onDragStart = (proj) => { draggedProject.value = proj; };
     const onDrop = (targetStage) => {
       if (!draggedProject.value) return;
@@ -218,6 +216,7 @@ createApp({
       const previousStage = proj.status;
       proj.status = newStage;
 
+      // STRICT CHECK: ONLY PLAY WHEN ENTERING COMPLETED FROM NON-COMPLETED
       if (previousStage !== 'Completed' && newStage === 'Completed') {
         proj.justCompleted = true;
         setTimeout(() => { proj.justCompleted = false; }, 2500);
@@ -307,7 +306,6 @@ createApp({
       return inventory.value.some(item => item.name.toLowerCase().includes(partName.toLowerCase()) && item.quantity > 0);
     };
 
-    // Auto-Reorder Check / Low Stock Trigger -> Adds to wishlist automatically
     const sendPartToShopping = (part) => {
       shoppingList.value.push({ id: Date.now(), name: part.name, price: (part.price || 0).toString(), link: '' });
     };
