@@ -1,16 +1,21 @@
-const { createApp, ref, onMounted, watch } = Vue;
+const { createApp, ref, computed, onMounted, watch } = Vue;
 
 createApp({
   setup() {
     const currentView = ref('projects');
     const selectedProject = ref(null);
+    const searchQuery = ref('');
 
-    // Modals & Delete confirmation state
+    // Resizable sidebar state
+    const sidebarWidth = ref(256);
+    const isResizing = ref(false);
+
+    // Modals & Delete state
     const showNewProjectModal = ref(false);
     const showAddPartToProjectModal = ref(false);
     const showNewInventoryModal = ref(false);
     const showNewShoppingModal = ref(false);
-    const deleteTarget = ref(null); // { type, id }
+    const deleteTarget = ref(null);
 
     const projects = ref(JSON.parse(localStorage.getItem('maker_projects')) || [
       {
@@ -23,6 +28,10 @@ createApp({
           { name: 'ESP32-S3 WROOM Module', qty: 1 },
           { name: 'INMP441 I2S Microphone', qty: 1 },
           { name: '1.3" SH1106 OLED Display', qty: 1 }
+        ],
+        pinouts: [
+          { mcuPin: 'GPIO 4', componentPin: 'SDA', notes: 'I2C Data Line' },
+          { mcuPin: 'GPIO 5', componentPin: 'SCL', notes: 'I2C Clock Line' }
         ]
       },
       {
@@ -34,7 +43,8 @@ createApp({
         bom: [
           { name: 'F4 12A AIO Flight Controller', qty: 1 },
           { name: '1103 8000KV Brushless Motors', qty: 4 }
-        ]
+        ],
+        pinouts: []
       }
     ]);
 
@@ -67,13 +77,100 @@ createApp({
     watch(inventory, val => localStorage.setItem('maker_inventory', JSON.stringify(val)), { deep: true });
     watch(shoppingList, val => localStorage.setItem('maker_shopping', JSON.stringify(val)), { deep: true });
 
+    // Search Filtering Computeds
+    const filteredProjects = computed(() => {
+      if (!searchQuery.value) return projects.value;
+      return projects.value.filter(p => p.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.value.toLowerCase()));
+    });
+
+    const filteredInventory = computed(() => {
+      if (!searchQuery.value) return inventory.value;
+      return inventory.value.filter(i => i.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || i.category.toLowerCase().includes(searchQuery.value.toLowerCase()));
+    });
+
+    const filteredShopping = computed(() => {
+      if (!searchQuery.value) return shoppingList.value;
+      return shoppingList.value.filter(s => s.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
+    });
+
+    // Sidebar Resizing Handlers
+    const onMouseDown = () => { isResizing.value = true; };
+    const onMouseMove = (e) => {
+      if (!isResizing.value) return;
+      if (e.clientX > 180 && e.clientX < 500) {
+        sidebarWidth.value = e.clientX;
+      }
+    };
+    const onMouseUp = () => { isResizing.value = false; };
+
+    // Smart Inventory Checker for BOM
+    const checkInventoryStock = (partName) => {
+      return inventory.value.some(item => item.name.toLowerCase().includes(partName.toLowerCase()) && item.quantity > 0);
+    };
+
+    const sendPartToShopping = (part) => {
+      shoppingList.value.push({
+        id: Date.now(),
+        name: part.name,
+        price: '0.00',
+        link: ''
+      });
+    };
+
+    // Pinout Mapping Actions
+    const addPinoutRow = () => {
+      if (!selectedProject.value) return;
+      if (!selectedProject.value.pinouts) selectedProject.value.pinouts = [];
+      selectedProject.value.pinouts.push({ mcuPin: '', componentPin: '', notes: '' });
+    };
+
+    const removePinoutRow = (idx) => {
+      if (selectedProject.value && selectedProject.value.pinouts) {
+        selectedProject.value.pinouts.splice(idx, 1);
+      }
+    };
+
+    // JSON Backup & Restore
+    const exportData = () => {
+      const backup = {
+        projects: projects.value,
+        inventory: inventory.value,
+        shoppingList: shoppingList.value
+      };
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `makeros-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    const importData = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.projects) projects.value = data.projects;
+          if (data.inventory) inventory.value = data.inventory;
+          if (data.shoppingList) shoppingList.value = data.shoppingList;
+          alert('Workspace restored successfully from backup!');
+        } catch (err) {
+          alert('Invalid JSON backup file.');
+        }
+      };
+      reader.readAsText(file);
+    };
+
     const openProject = (project) => {
       selectedProject.value = project;
     };
 
     const addProject = () => {
       if (!newProject.value.title) return;
-      projects.value.push({ id: Date.now(), ...newProject.value, bom: [] });
+      projects.value.push({ id: Date.now(), ...newProject.value, bom: [], pinouts: [] });
       newProject.value = { title: '', category: 'Robotics', status: 'In Progress', description: '' };
       showNewProjectModal.value = false;
     };
@@ -99,6 +196,7 @@ createApp({
 
     const addPartToProject = () => {
       if (!newBomPart.value.name || !selectedProject.value) return;
+      if (!selectedProject.value.bom) selectedProject.value.bom = [];
       selectedProject.value.bom.push({ ...newBomPart.value });
       newBomPart.value = { name: '', qty: 1 };
       showAddPartToProjectModal.value = false;
@@ -139,18 +237,24 @@ createApp({
       lucide.createIcons();
     });
 
-    watch([currentView, selectedProject, deleteTarget], () => {
+    watch([currentView, selectedProject, deleteTarget, searchQuery], () => {
       setTimeout(() => lucide.createIcons(), 50);
     });
 
     return {
       currentView,
       selectedProject,
+      searchQuery,
+      sidebarWidth,
+      isResizing,
       projects,
       inventory,
       shoppingList,
       software,
       ideas,
+      filteredProjects,
+      filteredInventory,
+      filteredShopping,
       showNewProjectModal,
       showAddPartToProjectModal,
       showNewInventoryModal,
@@ -168,7 +272,16 @@ createApp({
       removePartFromProject,
       addInventoryItem,
       addShoppingItem,
-      moveToInventory
+      moveToInventory,
+      checkInventoryStock,
+      sendPartToShopping,
+      addPinoutRow,
+      removePinoutRow,
+      exportData,
+      importData,
+      onMouseDown,
+      onMouseMove,
+      onMouseUp
     };
   }
 }).mount('#app');
