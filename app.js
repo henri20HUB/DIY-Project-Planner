@@ -1,4 +1,4 @@
-const { createApp, ref, computed, onMounted, watch } = Vue;
+const { createApp, ref, computed, onMounted, watch, nextTick } = Vue;
 
 createApp({
   setup() {
@@ -6,17 +6,18 @@ createApp({
     const selectedProject = ref(null);
     const searchQuery = ref('');
 
-    // Resizable sidebar state
+    // Resizable sidebar
     const sidebarWidth = ref(256);
     const isResizing = ref(false);
 
-    // Modals & Delete state
+    // Modals
     const showNewProjectModal = ref(false);
     const showAddPartToProjectModal = ref(false);
     const showNewInventoryModal = ref(false);
     const showNewShoppingModal = ref(false);
-    const showAddImageUrlModal = ref(false);
-    const newImageUrl = ref('');
+    const showNewFilamentModal = ref(false);
+    const activeDatasheetUrl = ref(null);
+    const qrBinModal = ref(null);
     const deleteTarget = ref(null);
 
     const projects = ref(JSON.parse(localStorage.getItem('maker_projects')) || [
@@ -25,12 +26,16 @@ createApp({
         title: 'AI Desktop Voice Assistant',
         category: 'AI Device',
         status: 'In Progress',
-        description: 'An independent desk companion featuring an ESP32-S3 microcontroller, INMP441 digital microphone, and a 1.3-inch OLED display. Streams voice queries over Wi-Fi to a local LLM server.',
+        targetBudget: 50,
+        description: 'An independent desk companion featuring an ESP32-S3 microcontroller, INMP441 digital microphone, and a 1.3-inch OLED display.',
         images: [],
+        cadModels: [
+          { name: 'Desktop Enclosure Base', url: 'https://printables.com', infill: '15% Gyroid', material: 'PLA', printTime: '2h 10m' }
+        ],
         bom: [
-          { name: 'ESP32-S3 WROOM Module', qty: 1 },
-          { name: 'INMP441 I2S Microphone', qty: 1 },
-          { name: '1.3" SH1106 OLED Display', qty: 1 }
+          { name: 'ESP32-S3 WROOM Module', qty: 1, price: 6.50 },
+          { name: 'INMP441 I2S Microphone', qty: 1, price: 3.20 },
+          { name: '1.3" OLED Display', qty: 1, price: 5.00 }
         ],
         pinouts: [
           { mcuPin: 'GPIO 4', componentPin: 'SDA', notes: 'I2C Data Line' },
@@ -40,9 +45,12 @@ createApp({
     ]);
 
     const inventory = ref(JSON.parse(localStorage.getItem('maker_inventory')) || [
-      { id: 1, name: 'ESP32-S3 WROOM', category: 'MCU', quantity: 4, location: 'Box 1 - Microcontrollers' },
-      { id: 2, name: 'Arduino Nano V3', category: 'MCU', quantity: 2, location: 'Box 1 - Microcontrollers' },
-      { id: 3, name: 'MG90S Metal Gear Servo', category: 'Actuator', quantity: 6, location: 'Box 3 - Motors' }
+      { id: 1, name: 'ESP32-S3 WROOM', category: 'MCU', quantity: 4, location: 'Box 1 - Microcontrollers', datasheet: '' },
+      { id: 2, name: 'Arduino Nano V3', category: 'MCU', quantity: 2, location: 'Box 1 - Microcontrollers', datasheet: '' }
+    ]);
+
+    const filamentSpools = ref(JSON.parse(localStorage.getItem('maker_filaments')) || [
+      { id: 1, brand: 'Bambu Lab', material: 'PLA Basic', color: 'Cyan', totalGrams: 1000, remainingGrams: 750, temp: '215C', hexColor: '#06b6d4' }
     ]);
 
     const shoppingList = ref(JSON.parse(localStorage.getItem('maker_shopping')) || [
@@ -57,58 +65,39 @@ createApp({
       { id: 1, title: 'Smart Plant Monitor', tag: 'IoT', details: 'Capacitive moisture sensor + ESP32 sending metrics via MQTT.' }
     ]);
 
-    const newProject = ref({ title: '', category: 'Robotics', status: 'In Progress', description: '' });
-    const newBomPart = ref({ name: '', qty: 1 });
-    const newInventoryItem = ref({ name: '', category: '', quantity: 1, location: '' });
+    const newProject = ref({ title: '', category: 'Robotics', status: 'Planning', targetBudget: null, description: '' });
+    const newBomPart = ref({ name: '', qty: 1, price: 0 });
+    const newInventoryItem = ref({ name: '', category: '', quantity: 1, location: '', datasheet: '' });
     const newShoppingItem = ref({ name: '', price: '', link: '' });
+    const newFilament = ref({ brand: '', material: 'PLA', color: 'Black', totalGrams: 1000, remainingGrams: 1000, temp: '210C' });
 
-    // Category recommendations mapping (unselected by default)
     const categoryRecommendations = {
-      'Drone': [
-        { name: 'F4 12A AIO Flight Controller', qty: 1, selected: false },
-        { name: '1103 Brushless Motors', qty: 4, selected: false },
-        { name: '2S 450mAh LiPo Battery', qty: 2, selected: false }
-      ],
-      'Robotics': [
-        { name: 'Arduino Nano V3', qty: 1, selected: false },
-        { name: 'MG90S Servo Motor', qty: 2, selected: false },
-        { name: 'L298N Motor Driver', qty: 1, selected: false }
-      ],
-      'Smart Home / IoT': [
-        { name: 'ESP32-WROOM NodeMCU', qty: 1, selected: false },
-        { name: 'DHT22 Temp/Humidity Sensor', qty: 1, selected: false },
-        { name: 'Relay Module 1-Channel', qty: 1, selected: false }
-      ],
-      'AI Device': [
-        { name: 'Raspberry Pi Zero 2 W', qty: 1, selected: false },
-        { name: 'USB Mini Microphone', qty: 1, selected: false },
-        { name: 'OLED Display 0.96"', qty: 1, selected: false }
-      ],
-      'Display / Media': [
-        { name: 'ESP32 Display Board with TFT', qty: 1, selected: false },
-        { name: 'WS2812B Addressable LED Strip', qty: 1, selected: false }
-      ]
+      'Drone': [{ name: 'F4 Flight Controller', qty: 1, price: 35, selected: false }, { name: '1103 Motors', qty: 4, price: 12, selected: false }],
+      'Robotics': [{ name: 'Arduino Nano V3', qty: 1, price: 4, selected: false }, { name: 'MG90S Servo', qty: 2, price: 3, selected: false }],
+      'Smart Home / IoT': [{ name: 'ESP32-WROOM', qty: 1, price: 5, selected: false }, { name: 'DHT22 Sensor', qty: 1, price: 4, selected: false }],
+      'AI Device': [{ name: 'Raspberry Pi Zero 2 W', qty: 1, price: 15, selected: false }, { name: 'USB Mic', qty: 1, price: 5, selected: false }],
+      'Display / Media': [{ name: 'ESP32 Display Board', qty: 1, price: 12, selected: false }]
     };
 
     const recommendedOptions = ref([]);
 
     const updateRecommendedParts = () => {
-      const list = categoryRecommendations[newProject.value.category] || [];
-      recommendedOptions.value = JSON.parse(JSON.stringify(list));
+      recommendedOptions.value = JSON.parse(JSON.stringify(categoryRecommendations[newProject.value.category] || []));
     };
 
     watch(showNewProjectModal, (val) => {
       if (val) {
-        newProject.value = { title: '', category: 'Robotics', status: 'In Progress', description: '' };
+        newProject.value = { title: '', category: 'Robotics', status: 'Planning', targetBudget: null, description: '' };
         updateRecommendedParts();
       }
     });
 
     watch(projects, val => localStorage.setItem('maker_projects', JSON.stringify(val)), { deep: true });
     watch(inventory, val => localStorage.setItem('maker_inventory', JSON.stringify(val)), { deep: true });
+    watch(filamentSpools, val => localStorage.setItem('maker_filaments', JSON.stringify(val)), { deep: true });
     watch(shoppingList, val => localStorage.setItem('maker_shopping', JSON.stringify(val)), { deep: true });
 
-    // Global Event Listener Resizing
+    // Sidebar Resizing
     const startResize = (e) => {
       e.preventDefault();
       isResizing.value = true;
@@ -118,9 +107,7 @@ createApp({
 
     const handleMouseMove = (e) => {
       if (!isResizing.value) return;
-      if (e.clientX >= 180 && e.clientX <= 500) {
-        sidebarWidth.value = e.clientX;
-      }
+      if (e.clientX >= 180 && e.clientX <= 500) sidebarWidth.value = e.clientX;
     };
 
     const stopResize = () => {
@@ -129,31 +116,56 @@ createApp({
       window.removeEventListener('mouseup', stopResize);
     };
 
-    // Project Images & Gallery Handlers
-    const uploadProjectImage = (event) => {
-      const file = event.target.files[0];
-      if (!file || !selectedProject.value) return;
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (!selectedProject.value.images) selectedProject.value.images = [];
-        selectedProject.value.images.push(e.target.result);
-      };
-      reader.readAsDataURL(file);
+    // Calculate BOM Total Cost
+    const calculateProjectCost = (project) => {
+      if (!project || !project.bom) return 0;
+      return project.bom.reduce((sum, item) => sum + ((item.price || 0) * (item.qty || 1)), 0).toFixed(2);
     };
 
-    const addImageUrl = () => {
-      if (!newImageUrl.value || !selectedProject.value) return;
-      if (!selectedProject.value.images) selectedProject.value.images = [];
-      selectedProject.value.images.push(newImageUrl.value);
-      newImageUrl.value = '';
-      showAddImageUrlModal.value = false;
+    // Datasheet Previewer
+    const openDatasheetModal = (url) => {
+      activeDatasheetUrl.value = url;
     };
 
-    const removeProjectImage = (index) => {
-      if (selectedProject.value && selectedProject.value.images) {
-        selectedProject.value.images.splice(index, 1);
-      }
+    // Storage Bin QR Code Generator
+    const generateQrLabel = (location) => {
+      qrBinModal.value = location;
+      nextTick(() => {
+        const qr = qrcode(0, 'L');
+        qr.addData(`MakerOS Bin: ${location}`);
+        qr.make();
+        const container = document.getElementById('qrcode-container');
+        if (container) container.innerHTML = qr.createImgTag(4);
+      });
+    };
+
+    // Shareable Summary Report Generator
+    const generateProjectReport = (project) => {
+      const reportHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head><title>${project.title} - MakerOS Report</title><style>body{font-family:sans-serif;padding:30px;background:#0f172a;color:#f8fafc;} h1{color:#38bdf8;} table{width:100%;border-collapse:collapse;margin:15px 0;} th,td{border:1px solid #334155;padding:8px;text-align:left;}</style></head>
+        <body>
+          <h1>${project.title} (${project.category})</h1>
+          <p><strong>Status:</strong> ${project.status} | <strong>Calculated Cost:</strong> $${calculateProjectCost(project)}</p>
+          <p>${project.description}</p>
+          <h2>Bill of Materials</h2>
+          <table><tr><th>Part Name</th><th>Qty</th><th>Unit Price</th></tr>
+          ${project.bom.map(b => `<tr><td>${b.name}</td><td>${b.qty}</td><td>$${b.price || 0}</td></tr>`).join('')}
+          </table>
+        </body>
+        </html>
+      `;
+      const blob = new Blob([reportHtml], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    };
+
+    // 3D CAD Models
+    const addCadModel = () => {
+      if (!selectedProject.value) return;
+      if (!selectedProject.value.cadModels) selectedProject.value.cadModels = [];
+      selectedProject.value.cadModels.push({ name: '', url: '', infill: '20%', material: 'PLA', printTime: '' });
     };
 
     // Computeds
@@ -177,7 +189,7 @@ createApp({
     };
 
     const sendPartToShopping = (part) => {
-      shoppingList.value.push({ id: Date.now(), name: part.name, price: '0.00', link: '' });
+      shoppingList.value.push({ id: Date.now(), name: part.name, price: (part.price || 0).toString(), link: '' });
     };
 
     const addPinoutRow = () => {
@@ -187,13 +199,11 @@ createApp({
     };
 
     const removePinoutRow = (idx) => {
-      if (selectedProject.value && selectedProject.value.pinouts) {
-        selectedProject.value.pinouts.splice(idx, 1);
-      }
+      if (selectedProject.value && selectedProject.value.pinouts) selectedProject.value.pinouts.splice(idx, 1);
     };
 
     const exportData = () => {
-      const backup = { projects: projects.value, inventory: inventory.value, shoppingList: shoppingList.value };
+      const backup = { projects: projects.value, inventory: inventory.value, shoppingList: shoppingList.value, filamentSpools: filamentSpools.value };
       const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -213,9 +223,10 @@ createApp({
           if (data.projects) projects.value = data.projects;
           if (data.inventory) inventory.value = data.inventory;
           if (data.shoppingList) shoppingList.value = data.shoppingList;
-          alert('Workspace restored successfully from backup!');
+          if (data.filamentSpools) filamentSpools.value = data.filamentSpools;
+          alert('Workspace restored successfully!');
         } catch (err) {
-          alert('Invalid JSON backup file.');
+          alert('Invalid backup file.');
         }
       };
       reader.readAsText(file);
@@ -227,45 +238,24 @@ createApp({
 
     const addProject = () => {
       if (!newProject.value.title) return;
-      
-      const selectedBom = recommendedOptions.value
-        .filter(rec => rec.selected)
-        .map(rec => ({ name: rec.name, qty: rec.qty }));
-
+      const selectedBom = recommendedOptions.value.filter(rec => rec.selected).map(rec => ({ name: rec.name, qty: rec.qty, price: rec.price }));
       const newId = Date.now();
-      projects.value.unshift({
-        id: newId,
-        ...newProject.value,
-        images: [],
-        bom: selectedBom,
-        pinouts: [],
-        justCreated: true
-      });
-
+      projects.value.unshift({ id: newId, ...newProject.value, images: [], cadModels: [], bom: selectedBom, pinouts: [], justCreated: true });
       showNewProjectModal.value = false;
-
       setTimeout(() => {
         const found = projects.value.find(p => p.id === newId);
         if (found) found.justCreated = false;
       }, 3000);
     };
 
-    const confirmDelete = (type, id) => {
-      deleteTarget.value = { type, id };
-    };
+    const confirmDelete = (type, id) => { deleteTarget.value = { type, id }; };
 
     const executeDelete = () => {
       if (!deleteTarget.value) return;
       const { type, id } = deleteTarget.value;
-
-      if (type === 'project') {
-        projects.value = projects.value.filter(p => p.id !== id);
-        selectedProject.value = null;
-      } else if (type === 'inventory') {
-        inventory.value = inventory.value.filter(i => i.id !== id);
-      } else if (type === 'shopping') {
-        shoppingList.value = shoppingList.value.filter(s => s.id !== id);
-      }
+      if (type === 'project') { projects.value = projects.value.filter(p => p.id !== id); selectedProject.value = null; }
+      else if (type === 'inventory') inventory.value = inventory.value.filter(i => i.id !== id);
+      else if (type === 'shopping') shoppingList.value = shoppingList.value.filter(s => s.id !== id);
       deleteTarget.value = null;
     };
 
@@ -273,20 +263,18 @@ createApp({
       if (!newBomPart.value.name || !selectedProject.value) return;
       if (!selectedProject.value.bom) selectedProject.value.bom = [];
       selectedProject.value.bom.push({ ...newBomPart.value });
-      newBomPart.value = { name: '', qty: 1 };
+      newBomPart.value = { name: '', qty: 1, price: 0 };
       showAddPartToProjectModal.value = false;
     };
 
     const removePartFromProject = (index) => {
-      if (selectedProject.value) {
-        selectedProject.value.bom.splice(index, 1);
-      }
+      if (selectedProject.value) selectedProject.value.bom.splice(index, 1);
     };
 
     const addInventoryItem = () => {
       if (!newInventoryItem.value.name) return;
       inventory.value.push({ id: Date.now(), ...newInventoryItem.value });
-      newInventoryItem.value = { name: '', category: '', quantity: 1, location: '' };
+      newInventoryItem.value = { name: '', category: '', quantity: 1, location: '', datasheet: '' };
       showNewInventoryModal.value = false;
     };
 
@@ -297,24 +285,20 @@ createApp({
       showNewShoppingModal.value = false;
     };
 
+    const addFilament = () => {
+      if (!newFilament.value.brand) return;
+      filamentSpools.value.push({ id: Date.now(), ...newFilament.value });
+      newFilament.value = { brand: '', material: 'PLA', color: 'Black', totalGrams: 1000, remainingGrams: 1000, temp: '210C' };
+      showNewFilamentModal.value = false;
+    };
+
     const moveToInventory = (shopItem) => {
-      inventory.value.push({
-        id: Date.now(),
-        name: shopItem.name,
-        category: 'Purchased Part',
-        quantity: 1,
-        location: 'Workbench'
-      });
+      inventory.value.push({ id: Date.now(), name: shopItem.name, category: 'Purchased Part', quantity: 1, location: 'Workbench', datasheet: '' });
       shoppingList.value = shoppingList.value.filter(s => s.id !== shopItem.id);
     };
 
-    onMounted(() => {
-      lucide.createIcons();
-    });
-
-    watch([currentView, selectedProject, deleteTarget, searchQuery], () => {
-      setTimeout(() => lucide.createIcons(), 50);
-    });
+    onMounted(() => { lucide.createIcons(); });
+    watch([currentView, selectedProject, deleteTarget, searchQuery], () => { setTimeout(() => lucide.createIcons(), 50); });
 
     return {
       currentView,
@@ -324,6 +308,7 @@ createApp({
       isResizing,
       projects,
       inventory,
+      filamentSpools,
       shoppingList,
       software,
       ideas,
@@ -334,13 +319,15 @@ createApp({
       showAddPartToProjectModal,
       showNewInventoryModal,
       showNewShoppingModal,
-      showAddImageUrlModal,
-      newImageUrl,
+      showNewFilamentModal,
+      activeDatasheetUrl,
+      qrBinModal,
       deleteTarget,
       newProject,
       newBomPart,
       newInventoryItem,
       newShoppingItem,
+      newFilament,
       recommendedOptions,
       updateRecommendedParts,
       openProject,
@@ -351,6 +338,7 @@ createApp({
       removePartFromProject,
       addInventoryItem,
       addShoppingItem,
+      addFilament,
       moveToInventory,
       checkInventoryStock,
       sendPartToShopping,
@@ -359,9 +347,11 @@ createApp({
       exportData,
       importData,
       startResize,
-      uploadProjectImage,
-      addImageUrl,
-      removeProjectImage
+      calculateProjectCost,
+      openDatasheetModal,
+      generateQrLabel,
+      generateProjectReport,
+      addCadModel
     };
   }
 }).mount('#app');
