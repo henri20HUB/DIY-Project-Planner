@@ -137,43 +137,102 @@
       
       <!-- VIEW: USER GUIDE & INTRO -->
       <section v-if="currentView === 'guide'" class="max-w-4xl mx-auto space-y-8 font-sans">
+        
+        <!-- Header -->
         <div class="border-b border-slate-800/60 pb-5 space-y-2">
           <div class="text-xs text-cyan-400 font-medium">Welcome to MakerOS</div>
-          <h2 class="text-2xl font-bold tracking-tight text-slate-100">Getting Started & User Guide</h2>
+          <h2 class="text-2xl font-bold tracking-tight text-slate-100">Getting Started & Interactive Tutorial</h2>
           <p class="text-xs text-slate-400 leading-relaxed">MakerOS is your all-in-one local engineering studio designed to help you plan hardware builds, manage component bins, calculate electrical specs, and track fabrication workflows.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-mono">
-          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-3">
-            <div class="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
-              <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-              <span>1. Projects & Kanban Pipeline</span>
+        <!-- Interactive Chaptered Tutorial Hub -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-6 space-y-5 shadow-lg">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-4">
+            <div>
+              <span class="text-[11px] text-cyan-400 font-mono font-bold uppercase tracking-wider">Chapter {{ tutorialStep + 1 }} of {{ tutorialChapters.length }}</span>
+              <h3 class="text-base font-semibold text-slate-100 mt-0.5">{{ currentChapter.title }}</h3>
             </div>
-            <p class="text-slate-300 leading-normal font-sans text-xs">Create projects with customized categories. Assign Bill of Materials (BOM) parts directly, track target budgets with real-time cost meters, and drag-and-drop project cards across your pipeline from <strong>Planning</strong> to <strong>Completed</strong>.</p>
+            <!-- Quick Chapter Selection Dropdown -->
+            <div class="flex items-center space-x-2">
+              <span class="text-xs text-slate-400">Jump to:</span>
+              <select v-model="tutorialStep" class="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-cyan-300 font-medium focus:outline-none focus:border-cyan-500">
+                <option v-for="(chap, idx) in tutorialChapters" :key="idx" :value="idx">
+                  Ch {{ idx + 1 }}: {{ chap.title }}
+                </option>
+              </select>
+            </div>
           </div>
 
-          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-3">
-            <div class="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
-              <i data-lucide="boxes" class="w-4 h-4"></i>
-              <span>2. Hardware Inventory & QR Bins</span>
+          <!-- Chapter Content Box -->
+          <div class="space-y-4">
+            <p class="text-xs text-slate-300 leading-relaxed bg-slate-950/60 p-4 rounded-lg border border-slate-800/80 font-mono">
+              {{ currentChapter.summary }}
+            </p>
+
+            <div class="space-y-2">
+              <div class="text-xs font-semibold text-cyan-300 flex items-center space-x-1.5">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                <span>Key Actions in this Chapter:</span>
+              </div>
+              <ul class="space-y-1.5 pl-4 text-xs text-slate-300 list-disc marker:text-cyan-400">
+                <li v-for="(action, aIdx) in currentChapter.actions" :key="aIdx">{{ action }}</li>
+              </ul>
             </div>
-            <p class="text-slate-300 leading-normal font-sans text-xs">Track parts across physical storage bins (e.g., *Box 1 - Microcontrollers*). Generate printable QR code labels for physical bins and instantly flag low-stock items against minimum safety limits.</p>
           </div>
 
-          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-3">
-            <div class="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
-              <i data-lucide="hammer" class="w-4 h-4"></i>
-              <span>3. Manufacturing Methods</span>
-            </div>
-            <p class="text-slate-300 leading-normal font-sans text-xs">Personalize your workshop capabilities by toggling your active fabrication methods (FDM 3D printing, CNC milling, SLA resin, PCB etching, laser cutting) to match your lab setup.</p>
-          </div>
+          <!-- Navigation Controls & Direct Jump Link -->
+          <div class="flex flex-col sm:flex-row justify-between items-center gap-3 pt-4 border-t border-slate-800/80">
+            <button @click="jumpToSection(currentChapter.targetView)" class="bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-3.5 py-2 rounded-lg text-xs font-medium transition flex items-center space-x-1.5">
+              <span>Try this view in MakerOS</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </button>
 
-          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-3">
-            <div class="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
-              <i data-lucide="terminal" class="w-4 h-4"></i>
-              <span>4. Calculators & Serial Terminal</span>
+            <div class="flex items-center space-x-2">
+              <button @click="prevTutorialStep" :disabled="tutorialStep === 0" class="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 text-xs text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-700 transition">
+                Previous Chapter
+              </button>
+              <button @click="nextTutorialStep" :disabled="tutorialStep === tutorialChapters.length - 1" class="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition">
+                Next Chapter
+              </button>
             </div>
-            <p class="text-slate-300 leading-normal font-sans text-xs">Use built-in Ohm's Law and LED drop resistor calculators on the fly. Connect microcontrollers over USB using the Web Serial API terminal to debug firmware directly in your browser.</p>
+          </div>
+        </div>
+
+        <!-- Preserved Module Feature Overview -->
+        <div class="border-t border-slate-800/80 pt-6 space-y-4">
+          <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-wider text-xs">Module Breakdown & Capability Overview</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-mono">
+            <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-3">
+              <div class="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
+                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                <span>1. Projects & Kanban Pipeline</span>
+              </div>
+              <p class="text-slate-300 leading-normal font-sans text-xs">Create projects with customized categories. Assign Bill of Materials (BOM) parts directly, track target budgets with real-time cost meters, and drag-and-drop project cards across your pipeline from <strong>Planning</strong> to <strong>Completed</strong>.</p>
+            </div>
+
+            <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-3">
+              <div class="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
+                <i data-lucide="boxes" class="w-4 h-4"></i>
+                <span>2. Hardware Inventory & QR Bins</span>
+              </div>
+              <p class="text-slate-300 leading-normal font-sans text-xs">Track parts across physical storage bins (e.g., *Box 1 - Microcontrollers*). Generate printable QR code labels for physical bins and instantly flag low-stock items against minimum safety limits.</p>
+            </div>
+
+            <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-3">
+              <div class="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
+                <i data-lucide="hammer" class="w-4 h-4"></i>
+                <span>3. Manufacturing Methods</span>
+              </div>
+              <p class="text-slate-300 leading-normal font-sans text-xs">Personalize your workshop capabilities by toggling your active fabrication methods (FDM 3D printing, CNC milling, SLA resin, PCB etching, laser cutting) to match your lab setup.</p>
+            </div>
+
+            <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-3">
+              <div class="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
+                <i data-lucide="terminal" class="w-4 h-4"></i>
+                <span>4. Calculators & Serial Terminal</span>
+              </div>
+              <p class="text-slate-300 leading-normal font-sans text-xs">Use built-in Ohm's Law and LED drop resistor calculators on the fly. Connect microcontrollers over USB using the Web Serial API terminal to debug firmware directly in your browser.</p>
+            </div>
           </div>
         </div>
 

@@ -2,13 +2,81 @@ const { createApp, ref, computed, onMounted, watch, nextTick } = Vue;
 
 createApp({
   setup() {
-    const currentView = ref('guide'); // Default to guide/intro
+    const currentView = ref('guide');
     const selectedProject = ref(null);
     const searchQuery = ref('');
 
     // Resizable sidebar
     const sidebarWidth = ref(256);
     const isResizing = ref(false);
+
+    // Tutorial Chapters State
+    const tutorialStep = ref(0);
+    const tutorialChapters = ref([
+      {
+        title: 'Creating Projects & Assigning BOMs',
+        targetView: 'projects',
+        summary: 'Start by creating project cards on the Projects Dashboard. Set your target budget and select recommended components or manually edit BOM part lists directly in line.',
+        actions: [
+          'Click "+ New Project" on the Projects Dashboard.',
+          'Set project goals, category, and target dollar limit.',
+          'Click into any created project to edit part names, quantities, and prices inline.'
+        ]
+      },
+      {
+        title: 'Managing Pipeline in Kanban',
+        targetView: 'kanban',
+        summary: 'Keep track of your active build stages using the drag-and-drop Kanban roadmap.',
+        actions: [
+          'Drag project cards from "Planning" to "Prototyping" or "Assembly".',
+          'Drop a card into "Completed" to trigger the celebration pulse & confetti emitter.',
+          'Alternatively, change stages instantly via the dropdown selector.'
+        ]
+      },
+      {
+        title: 'Hardware Inventory & Bin QR Labels',
+        targetView: 'inventory',
+        summary: 'Catalog all your loose ICs, sensors, and hardware parts while setting minimum safety stock thresholds.',
+        actions: [
+          'Add components with storage box locations (e.g., "Bin 3 - Motors").',
+          'Click the QR icon on any inventory row to display a printable storage label.',
+          'Items falling below safety limits automatically alert you to reorder.'
+        ]
+      },
+      {
+        title: 'Personalizing Manufacturing Methods',
+        targetView: 'manufacturing',
+        summary: 'Customize the fabrication catalog to reflect your personal workshop capabilities.',
+        actions: [
+          'Toggle checkboxes next to tools like 3D Printing, CNC Milling, or PCB Etching.',
+          'Add custom fabrication methods complete with tolerances and material notes.'
+        ]
+      },
+      {
+        title: 'Calculators & Web Serial Interface',
+        targetView: 'calculators',
+        summary: 'Leverage quick electronics math tools and connect hardware directly through USB.',
+        actions: [
+          'Calculate voltage drops, current, and required LED current-limiting resistors.',
+          'Switch to "Web Serial Terminal" to stream live USB serial logs from an ESP32 or Arduino.'
+        ]
+      }
+    ]);
+
+    const currentChapter = computed(() => tutorialChapters.value[tutorialStep.value]);
+
+    const nextTutorialStep = () => {
+      if (tutorialStep.value < tutorialChapters.value.length - 1) tutorialStep.value++;
+    };
+
+    const prevTutorialStep = () => {
+      if (tutorialStep.value > 0) tutorialStep.value--;
+    };
+
+    const jumpToSection = (viewName) => {
+      currentView.value = viewName;
+      selectedProject.value = null;
+    };
 
     // Drag and Drop state
     const draggedProject = ref(null);
@@ -216,7 +284,6 @@ createApp({
       const previousStage = proj.status;
       proj.status = newStage;
 
-      // STRICT CHECK: ONLY PLAY WHEN ENTERING COMPLETED FROM NON-COMPLETED
       if (previousStage !== 'Completed' && newStage === 'Completed') {
         proj.justCompleted = true;
         setTimeout(() => { proj.justCompleted = false; }, 2500);
@@ -414,7 +481,7 @@ createApp({
     };
 
     onMounted(() => { lucide.createIcons(); });
-    watch([currentView, selectedProject, deleteTarget, searchQuery], () => { setTimeout(() => lucide.createIcons(), 50); });
+    watch([currentView, selectedProject, deleteTarget, searchQuery, tutorialStep], () => { setTimeout(() => lucide.createIcons(), 50); });
 
     return {
       currentView,
@@ -487,7 +554,13 @@ createApp({
       serialInputText,
       connectSerial,
       disconnectSerial,
-      sendSerialCommand
+      sendSerialCommand,
+      tutorialStep,
+      tutorialChapters,
+      currentChapter,
+      nextTutorialStep,
+      prevTutorialStep,
+      jumpToSection
     };
   }
 }).mount('#app');
