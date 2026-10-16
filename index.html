@@ -88,7 +88,7 @@
         <div class="text-xs text-slate-400 font-mono space-y-1">
           <div class="flex justify-between"><span>Active Builds:</span> <span class="text-slate-200">{{ projects.filter(p => p.status !== 'Completed').length }}</span></div>
           <div class="flex justify-between"><span>Inventory Parts:</span> <span class="text-slate-200">{{ inventory.length }}</span></div>
-          <div class="flex justify-between"><span>Methods:</span> <span class="text-slate-200">{{ manufacturingMethods.length }}</span></div>
+          <div class="flex justify-between"><span>Active Methods:</span> <span class="text-slate-200">{{ manufacturingMethods.filter(m => m.enabled).length }}</span></div>
         </div>
         <div class="flex items-center space-x-2 pt-2 border-t border-slate-800/60">
           <button @click="exportData" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium py-1.5 px-2 rounded border border-slate-700 flex items-center justify-center space-x-1 transition">
@@ -133,15 +133,15 @@
                @click="openProject(project)"
                :class="[
                  project.justCreated ? 'ring-2 ring-cyan-400 shadow-lg bg-slate-900' : 'bg-slate-900/60 border border-slate-800',
-                 project.status === 'Completed' ? 'animate-celebration border-emerald-500/40' : ''
+                 project.justCompleted ? 'animate-celebration border-emerald-500/40' : ''
                ]"
                class="rounded-xl p-5 hover:border-slate-700 cursor-pointer transition-all duration-300 flex flex-col justify-between group shadow-sm">
             <div>
               <div class="flex items-center justify-between mb-3">
                 <span class="px-2.5 py-1 text-xs rounded-full font-medium border" 
                       :class="{
-                        'bg-cyan-500/10 text-cyan-300 border-cyan-500/20': project.status === 'In Progress' || project.status === 'Prototyping' || project.status === 'Assembly',
-                        'bg-emerald-500/10 text-emerald-300 border-emerald-500/20 animate-pulse': project.status === 'Completed',
+                        'bg-cyan-500/10 text-cyan-300 border-cyan-500/20': project.status !== 'Completed' && project.status !== 'Planning',
+                        'bg-emerald-500/10 text-emerald-300 border-emerald-500/20': project.status === 'Completed',
                         'bg-amber-500/10 text-amber-300 border-amber-500/20': project.status === 'Planning'
                       }">
                   {{ project.status }}
@@ -149,7 +149,6 @@
                 <span class="text-xs text-slate-400 font-medium">{{ project.category }}</span>
               </div>
 
-              <!-- Cover Image -->
               <div v-if="project.images && project.images.length > 0" class="mb-3 h-32 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-950">
                 <img :src="project.images[0]" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
               </div>
@@ -175,12 +174,12 @@
         </div>
       </section>
 
-      <!-- VIEW: KANBAN ROADMAP (DRAG AND DROP) -->
+      <!-- VIEW: KANBAN ROADMAP -->
       <section v-if="currentView === 'kanban'" class="max-w-7xl mx-auto space-y-6">
         <div class="border-b border-slate-800/60 pb-5">
           <div class="text-xs text-cyan-400 font-medium mb-1">Project Roadmap</div>
           <h2 class="text-xl font-semibold tracking-tight text-slate-100">Kanban Build Pipeline</h2>
-          <p class="text-xs text-slate-400 mt-1">Drag and drop project cards between columns or use the dropdown selectors.</p>
+          <p class="text-xs text-slate-400 mt-1">Drag and drop cards between stages or use the dropdown selectors.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -197,7 +196,7 @@
               <div v-for="proj in projects.filter(p => p.status === stage)" :key="proj.id" 
                    draggable="true"
                    @dragstart="onDragStart(proj)"
-                   :class="stage === 'Completed' ? 'animate-celebration border-emerald-500/40 bg-slate-900/90' : 'bg-slate-900 border-slate-800'"
+                   :class="proj.justCompleted ? 'animate-celebration border-emerald-500/50 bg-slate-900/90' : 'bg-slate-900 border-slate-800'"
                    class="border p-3.5 rounded-lg space-y-2 cursor-grab active:cursor-grabbing hover:border-cyan-500/50 transition transform hover:-translate-y-0.5 shadow-sm">
                 
                 <div class="flex items-center justify-between">
@@ -209,7 +208,7 @@
 
                 <div class="flex justify-between items-center pt-2 text-[10px] text-slate-500 border-t border-slate-800/60">
                   <span>{{ proj.category }}</span>
-                  <select v-model="proj.status" @change="checkCompletionAnimation(proj)" class="bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 text-slate-300 text-[10px] focus:outline-none">
+                  <select :value="proj.status" @change="onStageSelectChange(proj, $event.target.value)" class="bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 text-slate-300 text-[10px] focus:outline-none">
                     <option>Planning</option>
                     <option>Prototyping</option>
                     <option>Assembly</option>
@@ -322,7 +321,6 @@
           <div v-else class="space-y-2">
             <div v-for="(part, idx) in selectedProject.bom" :key="idx" class="flex justify-between items-center bg-slate-950/60 p-2.5 rounded-lg border border-slate-800 text-xs font-mono">
               <div class="flex items-center space-x-3 flex-1 mr-4">
-                <!-- Discrete Inline Inputs -->
                 <input v-model="part.name" placeholder="Part Name" class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-cyan-500 focus:outline-none text-slate-200 font-medium px-1 py-0.5 w-48 transition">
                 <div class="flex items-center space-x-1 text-slate-400">
                   <span>Qty:</span>
@@ -368,12 +366,13 @@
         </div>
       </section>
 
-      <!-- VIEW: MANUFACTURING METHODS DIRECTORY -->
+      <!-- VIEW: MANUFACTURING METHODS DIRECTORY WITH PERSONALIZED SELECTION -->
       <section v-if="currentView === 'manufacturing'" class="max-w-6xl mx-auto space-y-6">
-        <div class="flex justify-between items-end border-b border-slate-800/60 pb-5">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-slate-800/60 pb-5 gap-4">
           <div>
             <div class="text-xs text-cyan-400 font-medium mb-1">Production & Fabrication</div>
             <h2 class="text-xl font-semibold tracking-tight text-slate-100">Manufacturing Methods</h2>
+            <p class="text-xs text-slate-400 mt-1">Enable or disable methods to personalize your workspace lab tools.</p>
           </div>
           <button @click="showNewMethodModal = true" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium px-4 py-2 rounded-lg text-xs flex items-center space-x-2 transition shadow-sm">
             <i data-lucide="plus" class="w-4 h-4"></i>
@@ -382,9 +381,14 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono">
-          <div v-for="method in manufacturingMethods" :key="method.id" class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-3 shadow-sm">
+          <div v-for="method in manufacturingMethods" :key="method.id" 
+               :class="method.enabled ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-950/40 border-slate-900 opacity-60'"
+               class="border rounded-xl p-5 space-y-3 shadow-sm transition">
             <div class="flex justify-between items-start">
-              <h3 class="font-semibold text-slate-100 text-sm">{{ method.name }}</h3>
+              <div class="flex items-center space-x-3">
+                <input type="checkbox" v-model="method.enabled" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
+                <h3 class="font-semibold text-slate-100 text-sm">{{ method.name }}</h3>
+              </div>
               <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-cyan-400 border border-slate-700/50">{{ method.category }}</span>
             </div>
             <p class="text-xs text-slate-400 leading-normal">{{ method.description }}</p>
@@ -617,8 +621,8 @@
     <div v-if="showNewMethodModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-6 space-y-4 text-xs shadow-xl font-mono">
         <div class="font-bold text-slate-100 text-sm">Add Manufacturing Method</div>
-        <input v-model="newMethod.name" placeholder="Method Name (e.g. CNC Aluminum Milling)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
-        <input v-model="newMethod.category" placeholder="Category (Subtraction, Additive, PCB...)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
+        <input v-model="newMethod.name" placeholder="Method Name (e.g. Laser Cutting)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
+        <input v-model="newMethod.category" placeholder="Category (e.g. Subtractive, Thermal)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
         <textarea v-model="newMethod.description" placeholder="Process overview..." class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100 h-16"></textarea>
         <input v-model="newMethod.materials" placeholder="Compatible Materials" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
         <input v-model="newMethod.specs" placeholder="Tolerances & Specs" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">

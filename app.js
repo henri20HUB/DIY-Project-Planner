@@ -49,10 +49,16 @@ createApp({
       { id: 1, name: 'ESP32-S3 WROOM', category: 'MCU', quantity: 4, location: 'Box 1 - Microcontrollers', datasheet: '' }
     ]);
 
+    // Expanded & Personalizable Manufacturing Methods
     const manufacturingMethods = ref(JSON.parse(localStorage.getItem('maker_methods')) || [
-      { id: 1, name: 'FDM 3D Printing', category: 'Additive', description: 'Standard layer-by-layer polymer extrusion.', materials: 'PLA, PETG, ABS, TPU', specs: 'Layer height: 0.1mm - 0.28mm' },
-      { id: 2, name: 'CNC Aluminum Milling', category: 'Subtractive', description: 'Precision subtractive machining for structural brackets.', materials: '6061 Aluminum, Brass, Acrylic', specs: 'Tolerance: ±0.05mm' },
-      { id: 3, name: 'PCB Surface Mount Soldering', category: 'Electronics', description: 'Reflow and hand soldering for custom circuit boards.', materials: 'FR4, Copper Clad, Solder Paste', specs: 'Min trace: 0.2mm' }
+      { id: 1, name: 'FDM 3D Printing', category: 'Additive', enabled: true, description: 'Standard filament extrusion for enclosures and structural brackets.', materials: 'PLA, PETG, ABS, TPU', specs: 'Layer height: 0.1mm - 0.28mm' },
+      { id: 2, name: 'SLA Resin Printing', category: 'Additive', enabled: true, description: 'Photopolymer resin printing for high-precision miniature parts and molds.', materials: 'Standard Resin, Tough Resin', specs: 'Layer height: 0.025mm - 0.05mm' },
+      { id: 3, name: 'CNC Milling', category: 'Subtractive', enabled: true, description: 'Computer controlled milling for aluminum and hardwoods.', materials: '6061 Aluminum, Brass, Wood, Acrylic', specs: 'Tolerance: ±0.05mm' },
+      { id: 4, name: 'Laser Cutting & Engraving', category: 'Thermal / Optics', enabled: true, description: 'High precision 2D sheet material cutting and panel etching.', materials: 'Plywood, Acrylic, Leather, Cardboard', specs: 'Beam width: 0.1mm' },
+      { id: 5, name: 'Custom PCB Fabrication', category: 'Electronics', enabled: true, description: 'Surface-mount circuit board etching, solder paste, and reflow.', materials: 'FR4 Copper Clad, Solder Mask', specs: 'Min trace: 0.15mm' },
+      { id: 6, name: 'Silicone Mold Casting', category: 'Forming', enabled: false, description: 'Pouring liquid silicone over master models to cast resin or wax parts.', materials: 'Platinum Silicone, Polyurethane Resin', specs: 'Shore Hardness: 10A - 30A' },
+      { id: 7, name: 'Vacuum Thermoforming', category: 'Thermal', enabled: false, description: 'Heating plastic sheets over 3D printed molds with vacuum suction.', materials: 'PETG, HIPS, Polycarbonate', specs: 'Sheet thickness: 0.5mm - 2mm' },
+      { id: 8, name: 'Bench Workworking & Fitting', category: 'Manual', enabled: true, description: 'Hand sawing, drilling, tapping, and filing for custom fitting.', materials: 'Hardwoods, Aluminum Extrusions', specs: 'Manual tolerances' }
     ]);
 
     const shoppingList = ref(JSON.parse(localStorage.getItem('maker_shopping')) || [
@@ -106,15 +112,22 @@ createApp({
 
     const onDrop = (targetStage) => {
       if (!draggedProject.value) return;
-      draggedProject.value.status = targetStage;
-      checkCompletionAnimation(draggedProject.value);
+      changeProjectStage(draggedProject.value, targetStage);
       draggedProject.value = null;
     };
 
-    const checkCompletionAnimation = (proj) => {
-      if (proj.status === 'Completed') {
-        proj.justFinished = true;
-        setTimeout(() => { proj.justFinished = false; }, 1500);
+    const onStageSelectChange = (proj, newStage) => {
+      changeProjectStage(proj, newStage);
+    };
+
+    // STRICT COMPLETION ANIMATION TRIGGER: ONLY WHEN MOVED FROM NON-COMPLETED TO COMPLETED
+    const changeProjectStage = (proj, newStage) => {
+      const previousStage = proj.status;
+      proj.status = newStage;
+
+      if (previousStage !== 'Completed' && newStage === 'Completed') {
+        proj.justCompleted = true;
+        setTimeout(() => { proj.justCompleted = false; }, 1500);
       }
     };
 
@@ -298,7 +311,7 @@ createApp({
 
     const addManufacturingMethod = () => {
       if (!newMethod.value.name) return;
-      manufacturingMethods.value.push({ id: Date.now(), ...newMethod.value });
+      manufacturingMethods.value.push({ id: Date.now(), enabled: true, ...newMethod.value });
       newMethod.value = { name: '', category: '', description: '', materials: '', specs: '' };
       showNewMethodModal.value = false;
     };
@@ -365,7 +378,7 @@ createApp({
       addCadModel,
       onDragStart,
       onDrop,
-      checkCompletionAnimation
+      onStageSelectChange
     };
   }
 }).mount('#app');
