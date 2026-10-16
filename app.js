@@ -10,12 +10,15 @@ createApp({
     const sidebarWidth = ref(256);
     const isResizing = ref(false);
 
+    // Drag and Drop state
+    const draggedProject = ref(null);
+
     // Modals
     const showNewProjectModal = ref(false);
     const showAddPartToProjectModal = ref(false);
     const showNewInventoryModal = ref(false);
     const showNewShoppingModal = ref(false);
-    const showNewFilamentModal = ref(false);
+    const showNewMethodModal = ref(false);
     const activeDatasheetUrl = ref(null);
     const qrBinModal = ref(null);
     const deleteTarget = ref(null);
@@ -25,7 +28,7 @@ createApp({
         id: 1,
         title: 'AI Desktop Voice Assistant',
         category: 'AI Device',
-        status: 'In Progress',
+        status: 'Prototyping',
         targetBudget: 50,
         description: 'An independent desk companion featuring an ESP32-S3 microcontroller, INMP441 digital microphone, and a 1.3-inch OLED display.',
         images: [],
@@ -34,23 +37,22 @@ createApp({
         ],
         bom: [
           { name: 'ESP32-S3 WROOM Module', qty: 1, price: 6.50 },
-          { name: 'INMP441 I2S Microphone', qty: 1, price: 3.20 },
-          { name: '1.3" OLED Display', qty: 1, price: 5.00 }
+          { name: 'INMP441 I2S Microphone', qty: 1, price: 3.20 }
         ],
         pinouts: [
-          { mcuPin: 'GPIO 4', componentPin: 'SDA', notes: 'I2C Data Line' },
-          { mcuPin: 'GPIO 5', componentPin: 'SCL', notes: 'I2C Clock Line' }
+          { mcuPin: 'GPIO 4', componentPin: 'SDA', notes: 'I2C Data Line' }
         ]
       }
     ]);
 
     const inventory = ref(JSON.parse(localStorage.getItem('maker_inventory')) || [
-      { id: 1, name: 'ESP32-S3 WROOM', category: 'MCU', quantity: 4, location: 'Box 1 - Microcontrollers', datasheet: '' },
-      { id: 2, name: 'Arduino Nano V3', category: 'MCU', quantity: 2, location: 'Box 1 - Microcontrollers', datasheet: '' }
+      { id: 1, name: 'ESP32-S3 WROOM', category: 'MCU', quantity: 4, location: 'Box 1 - Microcontrollers', datasheet: '' }
     ]);
 
-    const filamentSpools = ref(JSON.parse(localStorage.getItem('maker_filaments')) || [
-      { id: 1, brand: 'Bambu Lab', material: 'PLA Basic', color: 'Cyan', totalGrams: 1000, remainingGrams: 750, temp: '215C', hexColor: '#06b6d4' }
+    const manufacturingMethods = ref(JSON.parse(localStorage.getItem('maker_methods')) || [
+      { id: 1, name: 'FDM 3D Printing', category: 'Additive', description: 'Standard layer-by-layer polymer extrusion.', materials: 'PLA, PETG, ABS, TPU', specs: 'Layer height: 0.1mm - 0.28mm' },
+      { id: 2, name: 'CNC Aluminum Milling', category: 'Subtractive', description: 'Precision subtractive machining for structural brackets.', materials: '6061 Aluminum, Brass, Acrylic', specs: 'Tolerance: ±0.05mm' },
+      { id: 3, name: 'PCB Surface Mount Soldering', category: 'Electronics', description: 'Reflow and hand soldering for custom circuit boards.', materials: 'FR4, Copper Clad, Solder Paste', specs: 'Min trace: 0.2mm' }
     ]);
 
     const shoppingList = ref(JSON.parse(localStorage.getItem('maker_shopping')) || [
@@ -69,7 +71,7 @@ createApp({
     const newBomPart = ref({ name: '', qty: 1, price: 0 });
     const newInventoryItem = ref({ name: '', category: '', quantity: 1, location: '', datasheet: '' });
     const newShoppingItem = ref({ name: '', price: '', link: '' });
-    const newFilament = ref({ brand: '', material: 'PLA', color: 'Black', totalGrams: 1000, remainingGrams: 1000, temp: '210C' });
+    const newMethod = ref({ name: '', category: '', description: '', materials: '', specs: '' });
 
     const categoryRecommendations = {
       'Drone': [{ name: 'F4 Flight Controller', qty: 1, price: 35, selected: false }, { name: '1103 Motors', qty: 4, price: 12, selected: false }],
@@ -94,8 +96,27 @@ createApp({
 
     watch(projects, val => localStorage.setItem('maker_projects', JSON.stringify(val)), { deep: true });
     watch(inventory, val => localStorage.setItem('maker_inventory', JSON.stringify(val)), { deep: true });
-    watch(filamentSpools, val => localStorage.setItem('maker_filaments', JSON.stringify(val)), { deep: true });
+    watch(manufacturingMethods, val => localStorage.setItem('maker_methods', JSON.stringify(val)), { deep: true });
     watch(shoppingList, val => localStorage.setItem('maker_shopping', JSON.stringify(val)), { deep: true });
+
+    // Drag and Drop Handlers
+    const onDragStart = (proj) => {
+      draggedProject.value = proj;
+    };
+
+    const onDrop = (targetStage) => {
+      if (!draggedProject.value) return;
+      draggedProject.value.status = targetStage;
+      checkCompletionAnimation(draggedProject.value);
+      draggedProject.value = null;
+    };
+
+    const checkCompletionAnimation = (proj) => {
+      if (proj.status === 'Completed') {
+        proj.justFinished = true;
+        setTimeout(() => { proj.justFinished = false; }, 1500);
+      }
+    };
 
     // Sidebar Resizing
     const startResize = (e) => {
@@ -116,18 +137,13 @@ createApp({
       window.removeEventListener('mouseup', stopResize);
     };
 
-    // Calculate BOM Total Cost
     const calculateProjectCost = (project) => {
       if (!project || !project.bom) return 0;
       return project.bom.reduce((sum, item) => sum + ((item.price || 0) * (item.qty || 1)), 0).toFixed(2);
     };
 
-    // Datasheet Previewer
-    const openDatasheetModal = (url) => {
-      activeDatasheetUrl.value = url;
-    };
+    const openDatasheetModal = (url) => { activeDatasheetUrl.value = url; };
 
-    // Storage Bin QR Code Generator
     const generateQrLabel = (location) => {
       qrBinModal.value = location;
       nextTick(() => {
@@ -139,7 +155,6 @@ createApp({
       });
     };
 
-    // Shareable Summary Report Generator
     const generateProjectReport = (project) => {
       const reportHtml = `
         <!DOCTYPE html>
@@ -161,14 +176,12 @@ createApp({
       window.open(url, '_blank');
     };
 
-    // 3D CAD Models
     const addCadModel = () => {
       if (!selectedProject.value) return;
       if (!selectedProject.value.cadModels) selectedProject.value.cadModels = [];
       selectedProject.value.cadModels.push({ name: '', url: '', infill: '20%', material: 'PLA', printTime: '' });
     };
 
-    // Computeds
     const filteredProjects = computed(() => {
       if (!searchQuery.value) return projects.value;
       return projects.value.filter(p => p.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.value.toLowerCase()));
@@ -203,7 +216,7 @@ createApp({
     };
 
     const exportData = () => {
-      const backup = { projects: projects.value, inventory: inventory.value, shoppingList: shoppingList.value, filamentSpools: filamentSpools.value };
+      const backup = { projects: projects.value, inventory: inventory.value, shoppingList: shoppingList.value, manufacturingMethods: manufacturingMethods.value };
       const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -223,7 +236,7 @@ createApp({
           if (data.projects) projects.value = data.projects;
           if (data.inventory) inventory.value = data.inventory;
           if (data.shoppingList) shoppingList.value = data.shoppingList;
-          if (data.filamentSpools) filamentSpools.value = data.filamentSpools;
+          if (data.manufacturingMethods) manufacturingMethods.value = data.manufacturingMethods;
           alert('Workspace restored successfully!');
         } catch (err) {
           alert('Invalid backup file.');
@@ -232,9 +245,7 @@ createApp({
       reader.readAsText(file);
     };
 
-    const openProject = (project) => {
-      selectedProject.value = project;
-    };
+    const openProject = (project) => { selectedProject.value = project; };
 
     const addProject = () => {
       if (!newProject.value.title) return;
@@ -285,11 +296,11 @@ createApp({
       showNewShoppingModal.value = false;
     };
 
-    const addFilament = () => {
-      if (!newFilament.value.brand) return;
-      filamentSpools.value.push({ id: Date.now(), ...newFilament.value });
-      newFilament.value = { brand: '', material: 'PLA', color: 'Black', totalGrams: 1000, remainingGrams: 1000, temp: '210C' };
-      showNewFilamentModal.value = false;
+    const addManufacturingMethod = () => {
+      if (!newMethod.value.name) return;
+      manufacturingMethods.value.push({ id: Date.now(), ...newMethod.value });
+      newMethod.value = { name: '', category: '', description: '', materials: '', specs: '' };
+      showNewMethodModal.value = false;
     };
 
     const moveToInventory = (shopItem) => {
@@ -308,7 +319,7 @@ createApp({
       isResizing,
       projects,
       inventory,
-      filamentSpools,
+      manufacturingMethods,
       shoppingList,
       software,
       ideas,
@@ -319,7 +330,7 @@ createApp({
       showAddPartToProjectModal,
       showNewInventoryModal,
       showNewShoppingModal,
-      showNewFilamentModal,
+      showNewMethodModal,
       activeDatasheetUrl,
       qrBinModal,
       deleteTarget,
@@ -327,7 +338,7 @@ createApp({
       newBomPart,
       newInventoryItem,
       newShoppingItem,
-      newFilament,
+      newMethod,
       recommendedOptions,
       updateRecommendedParts,
       openProject,
@@ -338,7 +349,7 @@ createApp({
       removePartFromProject,
       addInventoryItem,
       addShoppingItem,
-      addFilament,
+      addManufacturingMethod,
       moveToInventory,
       checkInventoryStock,
       sendPartToShopping,
@@ -351,7 +362,10 @@ createApp({
       openDatasheetModal,
       generateQrLabel,
       generateProjectReport,
-      addCadModel
+      addCadModel,
+      onDragStart,
+      onDrop,
+      checkCompletionAnimation
     };
   }
 }).mount('#app');

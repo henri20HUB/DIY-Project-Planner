@@ -10,7 +10,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Vue 3 -->
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-  <!-- QR Code Library for Storage Bin Labels -->
+  <!-- QR Code Library -->
   <script src="https://unpkg.com/qrcode-generator@1.4.4/qrcode.js"></script>
   <!-- Custom Styles -->
   <link rel="stylesheet" href="style.css">
@@ -53,11 +53,11 @@
             <span class="truncate">Hardware Inventory</span>
           </button>
 
-          <button @click="currentView = 'filaments'; selectedProject = null" 
-                  :class="currentView === 'filaments' ? 'bg-slate-800/80 text-cyan-400 border border-slate-700/50 shadow-sm' : 'text-slate-400 hover:bg-slate-800/40 hover:text-slate-200 border border-transparent'" 
+          <button @click="currentView = 'manufacturing'; selectedProject = null" 
+                  :class="currentView === 'manufacturing' ? 'bg-slate-800/80 text-cyan-400 border border-slate-700/50 shadow-sm' : 'text-slate-400 hover:bg-slate-800/40 hover:text-slate-200 border border-transparent'" 
                   class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-medium transition">
-            <i data-lucide="printer" class="w-4 h-4 shrink-0"></i>
-            <span class="truncate">Filament Spools</span>
+            <i data-lucide="hammer" class="w-4 h-4 shrink-0"></i>
+            <span class="truncate">Manufacturing Methods</span>
           </button>
 
           <button @click="currentView = 'shopping'; selectedProject = null" 
@@ -88,7 +88,7 @@
         <div class="text-xs text-slate-400 font-mono space-y-1">
           <div class="flex justify-between"><span>Active Builds:</span> <span class="text-slate-200">{{ projects.filter(p => p.status !== 'Completed').length }}</span></div>
           <div class="flex justify-between"><span>Inventory Parts:</span> <span class="text-slate-200">{{ inventory.length }}</span></div>
-          <div class="flex justify-between"><span>Spools:</span> <span class="text-slate-200">{{ filamentSpools.length }}</span></div>
+          <div class="flex justify-between"><span>Methods:</span> <span class="text-slate-200">{{ manufacturingMethods.length }}</span></div>
         </div>
         <div class="flex items-center space-x-2 pt-2 border-t border-slate-800/60">
           <button @click="exportData" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium py-1.5 px-2 rounded border border-slate-700 flex items-center justify-center space-x-1 transition">
@@ -131,14 +131,17 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div v-for="project in filteredProjects" :key="project.id" 
                @click="openProject(project)"
-               :class="project.justCreated ? 'ring-2 ring-cyan-400 shadow-lg bg-slate-900' : 'bg-slate-900/60 border border-slate-800'"
+               :class="[
+                 project.justCreated ? 'ring-2 ring-cyan-400 shadow-lg bg-slate-900' : 'bg-slate-900/60 border border-slate-800',
+                 project.status === 'Completed' ? 'animate-celebration border-emerald-500/40' : ''
+               ]"
                class="rounded-xl p-5 hover:border-slate-700 cursor-pointer transition-all duration-300 flex flex-col justify-between group shadow-sm">
             <div>
               <div class="flex items-center justify-between mb-3">
                 <span class="px-2.5 py-1 text-xs rounded-full font-medium border" 
                       :class="{
-                        'bg-cyan-500/10 text-cyan-300 border-cyan-500/20': project.status === 'In Progress' || project.status === 'Prototyping',
-                        'bg-emerald-500/10 text-emerald-300 border-emerald-500/20': project.status === 'Completed',
+                        'bg-cyan-500/10 text-cyan-300 border-cyan-500/20': project.status === 'In Progress' || project.status === 'Prototyping' || project.status === 'Assembly',
+                        'bg-emerald-500/10 text-emerald-300 border-emerald-500/20 animate-pulse': project.status === 'Completed',
                         'bg-amber-500/10 text-amber-300 border-amber-500/20': project.status === 'Planning'
                       }">
                   {{ project.status }}
@@ -162,7 +165,6 @@
                   / ${{ project.targetBudget }} limit
                 </span>
               </div>
-              <!-- Budget Progress Bar -->
               <div v-if="project.targetBudget" class="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800/80">
                 <div class="h-full transition-all duration-300" 
                      :style="{ width: Math.min((calculateProjectCost(project) / project.targetBudget) * 100, 100) + '%' }"
@@ -173,27 +175,41 @@
         </div>
       </section>
 
-      <!-- VIEW: KANBAN ROADMAP -->
+      <!-- VIEW: KANBAN ROADMAP (DRAG AND DROP) -->
       <section v-if="currentView === 'kanban'" class="max-w-7xl mx-auto space-y-6">
         <div class="border-b border-slate-800/60 pb-5">
           <div class="text-xs text-cyan-400 font-medium mb-1">Project Roadmap</div>
           <h2 class="text-xl font-semibold tracking-tight text-slate-100">Kanban Build Pipeline</h2>
+          <p class="text-xs text-slate-400 mt-1">Drag and drop project cards between columns or use the dropdown selectors.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div v-for="stage in ['Planning', 'Prototyping', 'Assembly', 'Completed']" :key="stage" class="bg-slate-900/40 border border-slate-800/80 rounded-xl p-4 space-y-3">
+          <div v-for="stage in ['Planning', 'Prototyping', 'Assembly', 'Completed']" :key="stage" 
+               @dragover.prevent
+               @drop="onDrop(stage)"
+               class="bg-slate-900/40 border border-slate-800/80 rounded-xl p-4 space-y-3 min-h-[400px] transition hover:border-cyan-500/30">
             <div class="flex justify-between items-center text-xs font-semibold text-slate-300 pb-2 border-b border-slate-800">
               <span>{{ stage }}</span>
               <span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-mono">{{ projects.filter(p => p.status === stage).length }}</span>
             </div>
 
-            <div class="space-y-3 min-h-[300px]">
-              <div v-for="proj in projects.filter(p => p.status === stage)" :key="proj.id" class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-2 hover:border-slate-700 transition">
-                <div class="font-medium text-xs text-slate-100">{{ proj.title }}</div>
+            <div class="space-y-3">
+              <div v-for="proj in projects.filter(p => p.status === stage)" :key="proj.id" 
+                   draggable="true"
+                   @dragstart="onDragStart(proj)"
+                   :class="stage === 'Completed' ? 'animate-celebration border-emerald-500/40 bg-slate-900/90' : 'bg-slate-900 border-slate-800'"
+                   class="border p-3.5 rounded-lg space-y-2 cursor-grab active:cursor-grabbing hover:border-cyan-500/50 transition transform hover:-translate-y-0.5 shadow-sm">
+                
+                <div class="flex items-center justify-between">
+                  <div class="font-medium text-xs text-slate-100">{{ proj.title }}</div>
+                  <i data-lucide="grip-vertical" class="w-3.5 h-3.5 text-slate-600"></i>
+                </div>
+
                 <div class="text-[11px] text-slate-400 line-clamp-2">{{ proj.description }}</div>
-                <div class="flex justify-between items-center pt-2 text-[10px] text-slate-500">
+
+                <div class="flex justify-between items-center pt-2 text-[10px] text-slate-500 border-t border-slate-800/60">
                   <span>{{ proj.category }}</span>
-                  <select v-model="proj.status" class="bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 text-slate-300 text-[10px] focus:outline-none">
+                  <select v-model="proj.status" @change="checkCompletionAnimation(proj)" class="bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 text-slate-300 text-[10px] focus:outline-none">
                     <option>Planning</option>
                     <option>Prototyping</option>
                     <option>Assembly</option>
@@ -225,7 +241,7 @@
               <div class="flex items-center space-x-3 mb-2">
                 <span class="px-2.5 py-1 text-xs rounded-full font-medium border" 
                       :class="{
-                        'bg-cyan-500/10 text-cyan-300 border-cyan-500/20': selectedProject.status === 'In Progress' || selectedProject.status === 'Prototyping',
+                        'bg-cyan-500/10 text-cyan-300 border-cyan-500/20': selectedProject.status !== 'Completed' && selectedProject.status !== 'Planning',
                         'bg-emerald-500/10 text-emerald-300 border-emerald-500/20': selectedProject.status === 'Completed',
                         'bg-amber-500/10 text-amber-300 border-amber-500/20': selectedProject.status === 'Planning'
                       }">
@@ -240,7 +256,7 @@
 
           <p class="text-slate-300 text-xs leading-relaxed bg-slate-950/60 p-4 rounded-lg border border-slate-800/80 font-mono">{{ selectedProject.description }}</p>
 
-          <!-- Budget & Cost Tracker Card -->
+          <!-- Budget & Cost Tracker -->
           <div class="bg-slate-950/80 p-4 rounded-lg border border-slate-800/80 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
             <div>
               <span class="text-slate-500 block">Calculated Total Cost</span>
@@ -276,25 +292,25 @@
           <div v-else class="space-y-3">
             <div v-for="(cad, cIdx) in selectedProject.cadModels" :key="cIdx" class="bg-slate-950/60 p-3 rounded-lg border border-slate-800 space-y-2 text-xs font-mono">
               <div class="flex justify-between items-center">
-                <input v-model="cad.name" placeholder="Model Name (e.g., Drone Frame Arm)" class="bg-slate-900 border border-slate-800 rounded p-1 text-slate-100 w-1/2">
+                <input v-model="cad.name" placeholder="Model Name" class="bg-slate-900 border border-slate-800 rounded p-1 text-slate-100 w-1/2">
                 <button @click="selectedProject.cadModels.splice(cIdx, 1)" class="text-slate-500 hover:text-rose-400">Remove</button>
               </div>
               <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px]">
                 <input v-model="cad.url" placeholder="Printables / MakerWorld Link" class="bg-slate-900 border border-slate-800 rounded p-1 text-slate-100">
-                <input v-model="cad.infill" placeholder="Infill (e.g. 20% Gyroid)" class="bg-slate-900 border border-slate-800 rounded p-1 text-slate-100">
-                <input v-model="cad.material" placeholder="Material (PLA/PETG/TPU)" class="bg-slate-900 border border-slate-800 rounded p-1 text-slate-100">
-                <input v-model="cad.printTime" placeholder="Print Time (e.g. 3h 45m)" class="bg-slate-900 border border-slate-800 rounded p-1 text-slate-100">
+                <input v-model="cad.infill" placeholder="Infill (e.g. 20%)" class="bg-slate-900 border border-slate-800 rounded p-1 text-slate-100">
+                <input v-model="cad.material" placeholder="Material (PLA/PETG)" class="bg-slate-900 border border-slate-800 rounded p-1 text-slate-100">
+                <input v-model="cad.printTime" placeholder="Print Time (e.g. 3h)" class="bg-slate-900 border border-slate-800 rounded p-1 text-slate-100">
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Bill of Materials (BOM) -->
+        <!-- Bill of Materials (BOM) with DISCRETE INLINE EDITING -->
         <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-6 space-y-4 shadow-sm">
           <div class="flex justify-between items-center">
             <h3 class="text-sm font-semibold text-slate-100 flex items-center space-x-2">
               <i data-lucide="layers" class="w-4 h-4 text-cyan-400"></i>
-              <span>Bill of Materials (BOM)</span>
+              <span>Bill of Materials (BOM) — <span class="text-[11px] text-slate-400 font-normal">Click any field to edit inline</span></span>
             </h3>
             <button @click="showAddPartToProjectModal = true" class="bg-slate-800 hover:bg-slate-700/80 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center space-x-1 font-medium">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
@@ -304,15 +320,23 @@
 
           <div v-if="selectedProject.bom.length === 0" class="text-xs text-slate-400 italic py-3">No components assigned.</div>
           <div v-else class="space-y-2">
-            <div v-for="(part, idx) in selectedProject.bom" :key="idx" class="flex justify-between items-center bg-slate-950/60 p-3 rounded-lg border border-slate-800 text-xs font-mono">
-              <div class="flex items-center space-x-3">
-                <span class="text-slate-200 font-medium">{{ part.name }}</span>
-                <span class="text-slate-400">Qty: {{ part.qty }}</span>
-                <span class="text-emerald-400 font-bold">${{ part.price || 0 }}</span>
+            <div v-for="(part, idx) in selectedProject.bom" :key="idx" class="flex justify-between items-center bg-slate-950/60 p-2.5 rounded-lg border border-slate-800 text-xs font-mono">
+              <div class="flex items-center space-x-3 flex-1 mr-4">
+                <!-- Discrete Inline Inputs -->
+                <input v-model="part.name" placeholder="Part Name" class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-cyan-500 focus:outline-none text-slate-200 font-medium px-1 py-0.5 w-48 transition">
+                <div class="flex items-center space-x-1 text-slate-400">
+                  <span>Qty:</span>
+                  <input v-model.number="part.qty" type="number" class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-cyan-500 focus:outline-none text-slate-200 px-1 py-0.5 w-12 text-center transition">
+                </div>
+                <div class="flex items-center space-x-1 text-emerald-400 font-bold">
+                  <span>$</span>
+                  <input v-model.number="part.price" type="number" step="0.01" class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-cyan-500 focus:outline-none text-emerald-400 px-1 py-0.5 w-16 transition">
+                </div>
+                
                 <span v-if="checkInventoryStock(part.name)" class="px-2 py-0.5 text-[10px] rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">In Stock</span>
                 <button v-else @click="sendPartToShopping(part)" class="px-2 py-0.5 text-[10px] rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition">Add to Wishlist</button>
               </div>
-              <button @click="removePartFromProject(idx)" class="text-slate-400 hover:text-rose-400 transition">Remove</button>
+              <button @click="removePartFromProject(idx)" class="text-slate-500 hover:text-rose-400 transition text-[11px]">Remove</button>
             </div>
           </div>
         </div>
@@ -333,9 +357,9 @@
           <div v-if="!selectedProject.pinouts || selectedProject.pinouts.length === 0" class="text-xs text-slate-400 italic py-3">No pin connections logged.</div>
           <div v-else class="space-y-2">
             <div v-for="(pin, pIdx) in selectedProject.pinouts" :key="pIdx" class="grid grid-cols-1 md:grid-cols-4 gap-2 items-center bg-slate-950/60 p-2.5 rounded-lg border border-slate-800 text-xs font-mono">
-              <input v-model="pin.mcuPin" placeholder="MCU Pin (e.g. GPIO 4)" class="bg-slate-900 border border-slate-800 rounded p-1.5 text-slate-100">
-              <input v-model="pin.componentPin" placeholder="Component Pin (e.g. SDA)" class="bg-slate-900 border border-slate-800 rounded p-1.5 text-slate-100">
-              <input v-model="pin.notes" placeholder="Notes / Protocol" class="bg-slate-900 border border-slate-800 rounded p-1.5 text-slate-100">
+              <input v-model="pin.mcuPin" placeholder="MCU Pin" class="bg-slate-900 border border-slate-800 rounded p-1.5 text-slate-100">
+              <input v-model="pin.componentPin" placeholder="Component Pin" class="bg-slate-900 border border-slate-800 rounded p-1.5 text-slate-100">
+              <input v-model="pin.notes" placeholder="Notes" class="bg-slate-900 border border-slate-800 rounded p-1.5 text-slate-100">
               <div class="text-right">
                 <button @click="removePinoutRow(pIdx)" class="text-slate-400 hover:text-rose-400 transition text-xs">Remove</button>
               </div>
@@ -344,43 +368,35 @@
         </div>
       </section>
 
-      <!-- VIEW: FILAMENT SPOOL INVENTORY -->
-      <section v-if="currentView === 'filaments'" class="max-w-6xl mx-auto space-y-6">
+      <!-- VIEW: MANUFACTURING METHODS DIRECTORY -->
+      <section v-if="currentView === 'manufacturing'" class="max-w-6xl mx-auto space-y-6">
         <div class="flex justify-between items-end border-b border-slate-800/60 pb-5">
           <div>
-            <div class="text-xs text-cyan-400 font-medium mb-1">3D Printing Supplies</div>
-            <h2 class="text-xl font-semibold tracking-tight text-slate-100">Filament Inventory</h2>
+            <div class="text-xs text-cyan-400 font-medium mb-1">Production & Fabrication</div>
+            <h2 class="text-xl font-semibold tracking-tight text-slate-100">Manufacturing Methods</h2>
           </div>
-          <button @click="showNewFilamentModal = true" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium px-4 py-2 rounded-lg text-xs flex items-center space-x-2 transition shadow-sm">
+          <button @click="showNewMethodModal = true" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium px-4 py-2 rounded-lg text-xs flex items-center space-x-2 transition shadow-sm">
             <i data-lucide="plus" class="w-4 h-4"></i>
-            <span>Add Spool</span>
+            <span>Add Method</span>
           </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono">
-          <div v-for="spool in filamentSpools" :key="spool.id" class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-3">
-            <div class="flex justify-between items-center">
-              <span class="font-semibold text-slate-100 text-xs">{{ spool.brand }} {{ spool.material }}</span>
-              <span class="px-2 py-0.5 rounded text-[10px] border border-slate-700 bg-slate-950" :style="{ color: spool.hexColor || '#38bdf8' }">● {{ spool.color }}</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono">
+          <div v-for="method in manufacturingMethods" :key="method.id" class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-3 shadow-sm">
+            <div class="flex justify-between items-start">
+              <h3 class="font-semibold text-slate-100 text-sm">{{ method.name }}</h3>
+              <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-cyan-400 border border-slate-700/50">{{ method.category }}</span>
             </div>
-            <div class="space-y-1">
-              <div class="flex justify-between text-[11px] text-slate-400">
-                <span>Weight Left:</span>
-                <span class="text-slate-200">{{ spool.remainingGrams }}g / {{ spool.totalGrams }}g</span>
-              </div>
-              <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
-                <div class="h-full bg-cyan-500 transition-all" :style="{ width: (spool.remainingGrams / spool.totalGrams) * 100 + '%' }"></div>
-              </div>
-            </div>
-            <div class="flex justify-between items-center pt-2 text-[10px] border-t border-slate-800/60">
-              <span class="text-slate-500">Temp: {{ spool.temp || '200C' }}</span>
-              <button @click="filamentSpools = filamentSpools.filter(s => s.id !== spool.id)" class="text-slate-500 hover:text-rose-400">Delete</button>
+            <p class="text-xs text-slate-400 leading-normal">{{ method.description }}</p>
+            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/80 text-[11px] space-y-1 text-slate-300">
+              <div><strong>Materials:</strong> {{ method.materials }}</div>
+              <div><strong>Tolerances & Specs:</strong> {{ method.specs }}</div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- VIEW: HARDWARE INVENTORY & STORAGE BIN QR GENERATOR -->
+      <!-- VIEW: HARDWARE INVENTORY -->
       <section v-if="currentView === 'inventory'" class="max-w-6xl mx-auto space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-slate-800/60 pb-5 gap-4">
           <div>
@@ -534,7 +550,7 @@
       </div>
     </div>
 
-    <!-- MODAL: PRINT QR BIN LABEL -->
+    <!-- MODAL: QR BIN LABEL -->
     <div v-if="qrBinModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-sm w-full p-6 text-center space-y-4 font-mono">
         <div class="text-sm font-bold text-slate-100">Storage Bin Label</div>
@@ -580,9 +596,7 @@
           <textarea v-model="newProject.description" placeholder="Description & goals..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none h-20"></textarea>
 
           <div class="bg-slate-950/80 p-3 rounded-lg border border-slate-800/80 space-y-2">
-            <div class="text-cyan-400 font-medium flex items-center justify-between">
-              <span>Recommended Parts (Optional)</span>
-            </div>
+            <div class="text-cyan-400 font-medium">Recommended Parts (Optional)</div>
             <div class="space-y-1.5 max-h-28 overflow-y-auto">
               <label v-for="(rec, rIdx) in recommendedOptions" :key="rIdx" class="flex items-center space-x-2 text-slate-300 hover:text-slate-100 cursor-pointer">
                 <input type="checkbox" v-model="rec.selected" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0">
@@ -599,17 +613,18 @@
       </div>
     </div>
 
-    <!-- MODAL: NEW FILAMENT -->
-    <div v-if="showNewFilamentModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <!-- MODAL: NEW MANUFACTURING METHOD -->
+    <div v-if="showNewMethodModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-6 space-y-4 text-xs shadow-xl font-mono">
-        <div class="font-bold text-slate-100 text-sm">Add Filament Spool</div>
-        <input v-model="newFilament.brand" placeholder="Brand (e.g. Bambu Lab, Polymaker)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
-        <input v-model="newFilament.material" placeholder="Material (PLA, PETG, TPU)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
-        <input v-model="newFilament.color" placeholder="Color Name" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
-        <input v-model.number="newFilament.remainingGrams" type="number" placeholder="Remaining Weight (Grams)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
+        <div class="font-bold text-slate-100 text-sm">Add Manufacturing Method</div>
+        <input v-model="newMethod.name" placeholder="Method Name (e.g. CNC Aluminum Milling)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
+        <input v-model="newMethod.category" placeholder="Category (Subtraction, Additive, PCB...)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
+        <textarea v-model="newMethod.description" placeholder="Process overview..." class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100 h-16"></textarea>
+        <input v-model="newMethod.materials" placeholder="Compatible Materials" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
+        <input v-model="newMethod.specs" placeholder="Tolerances & Specs" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
         <div class="flex justify-end space-x-3">
-          <button @click="showNewFilamentModal = false" class="text-slate-400">Cancel</button>
-          <button @click="addFilament" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium rounded">Save Spool</button>
+          <button @click="showNewMethodModal = false" class="text-slate-400">Cancel</button>
+          <button @click="addManufacturingMethod" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium rounded">Save Method</button>
         </div>
       </div>
     </div>
@@ -635,7 +650,7 @@
         <input v-model="newInventoryItem.name" placeholder="Component Name" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
         <input v-model="newInventoryItem.category" placeholder="Category" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
         <input v-model.number="newInventoryItem.quantity" type="number" placeholder="Quantity Owned" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
-        <input v-model="newInventoryItem.location" placeholder="Storage Bin (e.g. Box 1)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
+        <input v-model="newInventoryItem.location" placeholder="Storage Bin" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
         <input v-model="newInventoryItem.datasheet" placeholder="PDF Datasheet Link URL" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
         <div class="flex justify-end space-x-3">
           <button @click="showNewInventoryModal = false" class="text-slate-400">Cancel</button>
