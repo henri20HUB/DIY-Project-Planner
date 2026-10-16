@@ -60,6 +60,20 @@
             <span class="truncate">Manufacturing Methods</span>
           </button>
 
+          <button @click="currentView = 'calculators'; selectedProject = null" 
+                  :class="currentView === 'calculators' ? 'bg-slate-800/80 text-cyan-400 border border-slate-700/50 shadow-sm' : 'text-slate-400 hover:bg-slate-800/40 hover:text-slate-200 border border-transparent'" 
+                  class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-medium transition">
+            <i data-lucide="calculator" class="w-4 h-4 shrink-0"></i>
+            <span class="truncate">Component Calculators</span>
+          </button>
+
+          <button @click="currentView = 'serial'; selectedProject = null" 
+                  :class="currentView === 'serial' ? 'bg-slate-800/80 text-cyan-400 border border-slate-700/50 shadow-sm' : 'text-slate-400 hover:bg-slate-800/40 hover:text-slate-200 border border-transparent'" 
+                  class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-medium transition">
+            <i data-lucide="terminal" class="w-4 h-4 shrink-0"></i>
+            <span class="truncate">Web Serial Terminal</span>
+          </button>
+
           <button @click="currentView = 'shopping'; selectedProject = null" 
                   :class="currentView === 'shopping' ? 'bg-slate-800/80 text-cyan-400 border border-slate-700/50 shadow-sm' : 'text-slate-400 hover:bg-slate-800/40 hover:text-slate-200 border border-transparent'" 
                   class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-medium transition">
@@ -83,14 +97,19 @@
         </nav>
       </div>
 
-      <!-- Sidebar Footer -->
+      <!-- Sidebar Footer / Active Stopwatch Widget -->
       <div class="p-4 border-t border-slate-800/80 space-y-3">
-        <div class="text-xs text-slate-400 font-mono space-y-1">
-          <div class="flex justify-between"><span>Active Builds:</span> <span class="text-slate-200">{{ projects.filter(p => p.status !== 'Completed').length }}</span></div>
-          <div class="flex justify-between"><span>Inventory Parts:</span> <span class="text-slate-200">{{ inventory.length }}</span></div>
-          <div class="flex justify-between"><span>Active Methods:</span> <span class="text-slate-200">{{ manufacturingMethods.filter(m => m.enabled).length }}</span></div>
+        <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800/80 flex items-center justify-between font-mono text-xs">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="clock" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span class="text-slate-300">{{ formatStopwatch }}</span>
+          </div>
+          <button @click="toggleStopwatch" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold transition">
+            {{ stopwatchRunning ? 'Pause' : 'Start' }}
+          </button>
         </div>
-        <div class="flex items-center space-x-2 pt-2 border-t border-slate-800/60">
+
+        <div class="flex items-center space-x-2 pt-1">
           <button @click="exportData" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium py-1.5 px-2 rounded border border-slate-700 flex items-center justify-center space-x-1 transition">
             <i data-lucide="download" class="w-3 h-3"></i>
             <span>Export</span>
@@ -133,7 +152,7 @@
                @click="openProject(project)"
                :class="[
                  project.justCreated ? 'ring-2 ring-cyan-400 shadow-lg bg-slate-900' : 'bg-slate-900/60 border border-slate-800',
-                 project.justCompleted ? 'animate-celebration border-emerald-500/40' : ''
+                 project.justCompleted ? 'animate-celebration border-emerald-500/50' : ''
                ]"
                class="rounded-xl p-5 hover:border-slate-700 cursor-pointer transition-all duration-300 flex flex-col justify-between group shadow-sm">
             <div>
@@ -179,7 +198,7 @@
         <div class="border-b border-slate-800/60 pb-5">
           <div class="text-xs text-cyan-400 font-medium mb-1">Project Roadmap</div>
           <h2 class="text-xl font-semibold tracking-tight text-slate-100">Kanban Build Pipeline</h2>
-          <p class="text-xs text-slate-400 mt-1">Drag and drop cards between stages or use the dropdown selectors.</p>
+          <p class="text-xs text-slate-400 mt-1">Drag and drop project cards between columns.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -274,37 +293,7 @@
           </div>
         </div>
 
-        <!-- 3D Printing & CAD Assets -->
-        <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-6 space-y-4 shadow-sm">
-          <div class="flex justify-between items-center">
-            <h3 class="text-sm font-semibold text-slate-100 flex items-center space-x-2">
-              <i data-lucide="box" class="w-4 h-4 text-cyan-400"></i>
-              <span>3D Models & Print Parameters</span>
-            </h3>
-            <button @click="addCadModel" class="bg-slate-800 hover:bg-slate-700/80 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center space-x-1 font-medium">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              <span>Add CAD Link</span>
-            </button>
-          </div>
-
-          <div v-if="!selectedProject.cadModels || selectedProject.cadModels.length === 0" class="text-xs text-slate-400 italic py-3">No 3D print assets attached.</div>
-          <div v-else class="space-y-3">
-            <div v-for="(cad, cIdx) in selectedProject.cadModels" :key="cIdx" class="bg-slate-950/60 p-3 rounded-lg border border-slate-800 space-y-2 text-xs font-mono">
-              <div class="flex justify-between items-center">
-                <input v-model="cad.name" placeholder="Model Name" class="bg-slate-900 border border-slate-800 rounded p-1 text-slate-100 w-1/2">
-                <button @click="selectedProject.cadModels.splice(cIdx, 1)" class="text-slate-500 hover:text-rose-400">Remove</button>
-              </div>
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px]">
-                <input v-model="cad.url" placeholder="Printables / MakerWorld Link" class="bg-slate-900 border border-slate-800 rounded p-1 text-slate-100">
-                <input v-model="cad.infill" placeholder="Infill (e.g. 20%)" class="bg-slate-900 border border-slate-800 rounded p-1 text-slate-100">
-                <input v-model="cad.material" placeholder="Material (PLA/PETG)" class="bg-slate-900 border border-slate-800 rounded p-1 text-slate-100">
-                <input v-model="cad.printTime" placeholder="Print Time (e.g. 3h)" class="bg-slate-900 border border-slate-800 rounded p-1 text-slate-100">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bill of Materials (BOM) with DISCRETE INLINE EDITING -->
+        <!-- Bill of Materials (BOM) with Inline Editing -->
         <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-6 space-y-4 shadow-sm">
           <div class="flex justify-between items-center">
             <h3 class="text-sm font-semibold text-slate-100 flex items-center space-x-2">
@@ -366,13 +355,12 @@
         </div>
       </section>
 
-      <!-- VIEW: MANUFACTURING METHODS DIRECTORY WITH PERSONALIZED SELECTION -->
+      <!-- VIEW: MANUFACTURING METHODS DIRECTORY -->
       <section v-if="currentView === 'manufacturing'" class="max-w-6xl mx-auto space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-slate-800/60 pb-5 gap-4">
           <div>
             <div class="text-xs text-cyan-400 font-medium mb-1">Production & Fabrication</div>
             <h2 class="text-xl font-semibold tracking-tight text-slate-100">Manufacturing Methods</h2>
-            <p class="text-xs text-slate-400 mt-1">Enable or disable methods to personalize your workspace lab tools.</p>
           </div>
           <button @click="showNewMethodModal = true" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium px-4 py-2 rounded-lg text-xs flex items-center space-x-2 transition shadow-sm">
             <i data-lucide="plus" class="w-4 h-4"></i>
@@ -396,6 +384,92 @@
               <div><strong>Materials:</strong> {{ method.materials }}</div>
               <div><strong>Tolerances & Specs:</strong> {{ method.specs }}</div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: COMPONENT CALCULATORS -->
+      <section v-if="currentView === 'calculators'" class="max-w-4xl mx-auto space-y-6">
+        <div class="border-b border-slate-800/60 pb-5">
+          <div class="text-xs text-cyan-400 font-medium mb-1">Electronics Utilities</div>
+          <h2 class="text-xl font-semibold tracking-tight text-slate-100">Component Calculators</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Ohm's Law Calculator -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-4 font-mono text-xs">
+            <div class="font-bold text-slate-100 text-sm flex items-center space-x-2">
+              <i data-lucide="zap" class="w-4 h-4 text-cyan-400"></i>
+              <span>Ohm's Law Calculator</span>
+            </div>
+            <div class="space-y-3">
+              <div>
+                <label class="text-slate-400 block mb-1">Voltage (Volts - V)</label>
+                <input v-model.number="ohmsVolts" type="number" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
+              </div>
+              <div>
+                <label class="text-slate-400 block mb-1">Resistance (Ohms - Ω)</label>
+                <input v-model.number="ohmsResistance" type="number" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
+              </div>
+              <div class="pt-3 border-t border-slate-800/80 text-emerald-400 font-bold">
+                Calculated Current (Amps): {{ calculatedAmps }} A
+              </div>
+            </div>
+          </div>
+
+          <!-- LED Resistor Calculator -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-4 font-mono text-xs">
+            <div class="font-bold text-slate-100 text-sm flex items-center space-x-2">
+              <i data-lucide="activity" class="w-4 h-4 text-cyan-400"></i>
+              <span>LED Drop Resistor</span>
+            </div>
+            <div class="space-y-3">
+              <div>
+                <label class="text-slate-400 block mb-1">Source Voltage (V)</label>
+                <input v-model.number="ledSourceV" type="number" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
+              </div>
+              <div>
+                <label class="text-slate-400 block mb-1">LED Forward Voltage (V)</label>
+                <input v-model.number="ledForwardV" type="number" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
+              </div>
+              <div>
+                <label class="text-slate-400 block mb-1">LED Current (mA)</label>
+                <input v-model.number="ledCurrentMa" type="number" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
+              </div>
+              <div class="pt-3 border-t border-slate-800/80 text-cyan-400 font-bold">
+                Required Resistor: {{ calculatedLedResistor }} Ω
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: WEB SERIAL TERMINAL -->
+      <section v-if="currentView === 'serial'" class="max-w-5xl mx-auto space-y-6">
+        <div class="flex justify-between items-end border-b border-slate-800/60 pb-5">
+          <div>
+            <div class="text-xs text-cyan-400 font-medium mb-1">Microcontroller Interface</div>
+            <h2 class="text-xl font-semibold tracking-tight text-slate-100">Web Serial Console</h2>
+          </div>
+          <div class="flex items-center space-x-3">
+            <button @click="connectSerial" v-if="!serialConnected" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium px-4 py-2 rounded-lg text-xs flex items-center space-x-2 transition">
+              <i data-lucide="plug" class="w-4 h-4"></i>
+              <span>Connect Device</span>
+            </button>
+            <button @click="disconnectSerial" v-else class="bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 font-medium px-4 py-2 rounded-lg text-xs transition">
+              Disconnect
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-4 font-mono text-xs shadow-sm">
+          <div class="h-80 bg-slate-950 rounded-lg p-4 overflow-y-auto border border-slate-800/80 text-cyan-300 space-y-1">
+            <div v-if="serialLogs.length === 0" class="text-slate-600 italic">No serial data received. Connect an Arduino/ESP32 via USB and click Connect Device...</div>
+            <div v-for="(log, lIdx) in serialLogs" :key="lIdx">{{ log }}</div>
+          </div>
+          <div class="flex space-x-3">
+            <input v-model="serialInputText" @keyup.enter="sendSerialCommand" type="text" placeholder="Type command to send (e.g., AT+RST)..." class="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none">
+            <button @click="sendSerialCommand" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-lg transition font-medium">Send</button>
           </div>
         </div>
       </section>
@@ -425,7 +499,7 @@
               <tr>
                 <th class="px-4 py-3">Component Name</th>
                 <th class="px-4 py-3">Datasheet</th>
-                <th class="px-4 py-3">Stock</th>
+                <th class="px-4 py-3">Stock / Min Limit</th>
                 <th class="px-4 py-3">Storage Location</th>
                 <th class="px-4 py-3 text-right">Action</th>
               </tr>
@@ -440,7 +514,12 @@
                   </button>
                   <span v-else class="text-slate-600">-</span>
                 </td>
-                <td class="px-4 py-3 text-cyan-400 font-bold">{{ item.quantity }} pcs</td>
+                <td class="px-4 py-3">
+                  <span :class="item.quantity <= (item.minStock || 1) ? 'text-rose-400 font-bold' : 'text-cyan-400 font-bold'">
+                    {{ item.quantity }} pcs
+                  </span>
+                  <span class="text-slate-500 text-[10px] block">Min: {{ item.minStock || 1 }}</span>
+                </td>
                 <td class="px-4 py-3 text-slate-400 flex items-center space-x-2">
                   <span>{{ item.location || 'Workbench' }}</span>
                   <button @click="generateQrLabel(item.location || 'Workbench')" title="Print QR Bin Label" class="text-slate-500 hover:text-cyan-400">
@@ -543,7 +622,7 @@
 
     </main>
 
-    <!-- MODAL: DATASHEET VIEWER -->
+    <!-- MODALS -->
     <div v-if="activeDatasheetUrl" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-4xl w-full h-[80vh] flex flex-col p-4 space-y-3">
         <div class="flex justify-between items-center text-xs font-mono">
@@ -554,7 +633,6 @@
       </div>
     </div>
 
-    <!-- MODAL: QR BIN LABEL -->
     <div v-if="qrBinModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-sm w-full p-6 text-center space-y-4 font-mono">
         <div class="text-sm font-bold text-slate-100">Storage Bin Label</div>
@@ -564,7 +642,6 @@
       </div>
     </div>
 
-    <!-- MODAL: DELETE CONFIRMATION -->
     <div v-if="deleteTarget" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-sm w-full p-5 space-y-4 shadow-xl font-mono text-xs">
         <div class="text-rose-400 font-semibold uppercase tracking-wider flex items-center space-x-2">
@@ -579,7 +656,6 @@
       </div>
     </div>
 
-    <!-- MODAL: NEW PROJECT -->
     <div v-if="showNewProjectModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-lg w-full p-6 space-y-4 text-xs shadow-xl">
         <div class="font-semibold text-slate-100 text-sm flex items-center space-x-2">
@@ -617,12 +693,11 @@
       </div>
     </div>
 
-    <!-- MODAL: NEW MANUFACTURING METHOD -->
     <div v-if="showNewMethodModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-6 space-y-4 text-xs shadow-xl font-mono">
         <div class="font-bold text-slate-100 text-sm">Add Manufacturing Method</div>
-        <input v-model="newMethod.name" placeholder="Method Name (e.g. Laser Cutting)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
-        <input v-model="newMethod.category" placeholder="Category (e.g. Subtractive, Thermal)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
+        <input v-model="newMethod.name" placeholder="Method Name" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
+        <input v-model="newMethod.category" placeholder="Category" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
         <textarea v-model="newMethod.description" placeholder="Process overview..." class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100 h-16"></textarea>
         <input v-model="newMethod.materials" placeholder="Compatible Materials" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
         <input v-model="newMethod.specs" placeholder="Tolerances & Specs" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
@@ -633,7 +708,6 @@
       </div>
     </div>
 
-    <!-- MODAL: ADD PART TO PROJECT BOM -->
     <div v-if="showAddPartToProjectModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-6 space-y-4 text-xs shadow-xl">
         <div class="font-semibold text-slate-100 text-sm">Assign Component to BOM</div>
@@ -647,13 +721,13 @@
       </div>
     </div>
 
-    <!-- MODAL: NEW INVENTORY ITEM -->
     <div v-if="showNewInventoryModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-6 space-y-4 text-xs shadow-xl font-mono">
         <div class="font-bold text-slate-100 text-sm">Add Component to Inventory</div>
         <input v-model="newInventoryItem.name" placeholder="Component Name" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
         <input v-model="newInventoryItem.category" placeholder="Category" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
         <input v-model.number="newInventoryItem.quantity" type="number" placeholder="Quantity Owned" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
+        <input v-model.number="newInventoryItem.minStock" type="number" placeholder="Minimum Safety Stock Alert" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
         <input v-model="newInventoryItem.location" placeholder="Storage Bin" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
         <input v-model="newInventoryItem.datasheet" placeholder="PDF Datasheet Link URL" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100">
         <div class="flex justify-end space-x-3">
@@ -663,7 +737,6 @@
       </div>
     </div>
 
-    <!-- MODAL: NEW SHOPPING ITEM -->
     <div v-if="showNewShoppingModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-6 space-y-4 text-xs shadow-xl">
         <div class="font-semibold text-slate-100 text-sm">Add Item to Wishlist</div>

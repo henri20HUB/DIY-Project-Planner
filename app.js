@@ -13,6 +13,25 @@ createApp({
     // Drag and Drop state
     const draggedProject = ref(null);
 
+    // Stopwatch state
+    const stopwatchSeconds = ref(0);
+    const stopwatchRunning = ref(false);
+    let stopwatchInterval = null;
+
+    // Web Serial state
+    const serialConnected = ref(false);
+    const serialLogs = ref([]);
+    const serialInputText = ref('');
+    let serialPort = null;
+    let serialReader = null;
+
+    // Calculator states
+    const ohmsVolts = ref(5);
+    const ohmsResistance = ref(220);
+    const ledSourceV = ref(5);
+    const ledForwardV = ref(2.1);
+    const ledCurrentMa = ref(20);
+
     // Modals
     const showNewProjectModal = ref(false);
     const showAddPartToProjectModal = ref(false);
@@ -46,10 +65,9 @@ createApp({
     ]);
 
     const inventory = ref(JSON.parse(localStorage.getItem('maker_inventory')) || [
-      { id: 1, name: 'ESP32-S3 WROOM', category: 'MCU', quantity: 4, location: 'Box 1 - Microcontrollers', datasheet: '' }
+      { id: 1, name: 'ESP32-S3 WROOM', category: 'MCU', quantity: 1, minStock: 2, location: 'Box 1 - Microcontrollers', datasheet: '' }
     ]);
 
-    // Expanded & Personalizable Manufacturing Methods
     const manufacturingMethods = ref(JSON.parse(localStorage.getItem('maker_methods')) || [
       { id: 1, name: 'FDM 3D Printing', category: 'Additive', enabled: true, description: 'Standard filament extrusion for enclosures and structural brackets.', materials: 'PLA, PETG, ABS, TPU', specs: 'Layer height: 0.1mm - 0.28mm' },
       { id: 2, name: 'SLA Resin Printing', category: 'Additive', enabled: true, description: 'Photopolymer resin printing for high-precision miniature parts and molds.', materials: 'Standard Resin, Tough Resin', specs: 'Layer height: 0.025mm - 0.05mm' },
@@ -75,7 +93,7 @@ createApp({
 
     const newProject = ref({ title: '', category: 'Robotics', status: 'Planning', targetBudget: null, description: '' });
     const newBomPart = ref({ name: '', qty: 1, price: 0 });
-    const newInventoryItem = ref({ name: '', category: '', quantity: 1, location: '', datasheet: '' });
+    const newInventoryItem = ref({ name: '', category: '', quantity: 1, minStock: 2, location: '', datasheet: '' });
     const newShoppingItem = ref({ name: '', price: '', link: '' });
     const newMethod = ref({ name: '', category: '', description: '', materials: '', specs: '' });
 
@@ -105,30 +123,105 @@ createApp({
     watch(manufacturingMethods, val => localStorage.setItem('maker_methods', JSON.stringify(val)), { deep: true });
     watch(shoppingList, val => localStorage.setItem('maker_shopping', JSON.stringify(val)), { deep: true });
 
-    // Drag and Drop Handlers
-    const onDragStart = (proj) => {
-      draggedProject.value = proj;
+    // Calculator Computed Properties
+    const calculatedAmps = computed(() => {
+      if (!ohmsResistance.value || ohmsResistance.value === 0) return 0;
+      return (ohmsVolts.value / ohmsResistance.value).toFixed(2);
+    });
+
+    const calculatedLedResistor = computed(() => {
+      if (!ledCurrentMa.value || ledCurrentMa.value === 0) return 0;
+      const amps = ledCurrentMa.value / 1000;
+      return Math.round((ledSourceV.value - ledForwardV.value) / amps);
+    });
+
+    // Stopwatch Logic
+    const formatStopwatch = computed(() => {
+      const hrs = Math.floor(stopwatchSeconds.value / 3600).toString().padStart(2, '0');
+      const mins = Math.floor((stopwatchSeconds.value % 3600) / 60).toString().padStart(2, '0');
+      const secs = (stopwatchSeconds.value % 60).toString().padStart(2, '0');
+      return `${hrs}:${mins}:${secs}`;
+    });
+
+    const toggleStopwatch = () => {
+      stopwatchRunning.value = !stopwatchRunning.value;
+      if (stopwatchRunning.value) {
+        stopwatchInterval = setInterval(() => { stopwatchSeconds.value++; }, 1000);
+      } else {
+        clearInterval(stopwatchInterval);
+      }
     };
 
+    // Web Serial API Implementation
+    const connectSerial = async () => {
+      if (!('serial' in navigator)) {
+        alert('Web Serial API is not supported in this browser. Try Google Chrome or Microsoft Edge.');
+        return;
+      }
+      try {
+        serialPort = await navigator.serial.requestPort();
+        await serialPort.open({ baudRate: 115200 });
+        serialConnected.value = true;
+        serialLogs.value.push('[System] Connected successfully to serial port.');
+
+        // Read loop
+        while (serialPort.readable && serialConnected.value) {
+          const textDecoder = new TextDecoderStream();
+          const readableStreamClosed = serialPort.readable.pipeTo(textDecoder.writable);
+          const reader = textDecoder.readable.getReader();
+          try {
+            while (true) {
+              const { value, done } = await reader.read();
+              if (done) break;
+              if (value) serialLogs.value.push(value);
+            }
+          } catch (error) {
+            console.error(error);
+          } finally {
+            reader.releaseLock();
+          }
+        }
+      } catch (err) {
+        console.error('Serial connection error:', err);
+      }
+    };
+
+    const disconnectSerial = async () => {
+      if (serialPort) {
+        serialConnected.value = false;
+        await serialPort.close();
+        serialPort = null;
+        serialLogs.value.push('[System] Serial port disconnected.');
+      }
+    };
+
+    const sendSerialCommand = async () => {
+      if (!serialPort || !serialPort.writable) return;
+      const encoder = new TextEncoder();
+      const writer = serialPort.writable.getWriter();
+      await writer.write(encoder.encode(serialInputText.value + '\n'));
+      serialLogs.value.push(`> ${serialInputText.value}`);
+      serialInputText.value = '';
+      writer.releaseLock();
+    };
+
+    // Drag and Drop & Completion Animation Trigger
+    const onDragStart = (proj) => { draggedProject.value = proj; };
     const onDrop = (targetStage) => {
       if (!draggedProject.value) return;
       changeProjectStage(draggedProject.value, targetStage);
       draggedProject.value = null;
     };
+    const onStageSelectChange = (proj, newStage) => { changeProjectStage(proj, newStage); };
 
-    const onStageSelectChange = (proj, newStage) => {
-      changeProjectStage(proj, newStage);
-    };
-
-    // STRICT COMPLETION ANIMATION TRIGGER: ONLY WHEN MOVED FROM NON-COMPLETED TO COMPLETED
     const changeProjectStage = (proj, newStage) => {
-        const previousStage = proj.status;
-        proj.status = newStage;
+      const previousStage = proj.status;
+      proj.status = newStage;
 
-        if (previousStage !== 'Completed' && newStage === 'Completed') {
-            proj.justCompleted = true;
-            setTimeout(() => { proj.justCompleted = false; }, 2200); // Extended for particle burst
-        }
+      if (previousStage !== 'Completed' && newStage === 'Completed') {
+        proj.justCompleted = true;
+        setTimeout(() => { proj.justCompleted = false; }, 2500);
+      }
     };
 
     // Sidebar Resizing
@@ -214,6 +307,7 @@ createApp({
       return inventory.value.some(item => item.name.toLowerCase().includes(partName.toLowerCase()) && item.quantity > 0);
     };
 
+    // Auto-Reorder Check / Low Stock Trigger -> Adds to wishlist automatically
     const sendPartToShopping = (part) => {
       shoppingList.value.push({ id: Date.now(), name: part.name, price: (part.price || 0).toString(), link: '' });
     };
@@ -298,7 +392,7 @@ createApp({
     const addInventoryItem = () => {
       if (!newInventoryItem.value.name) return;
       inventory.value.push({ id: Date.now(), ...newInventoryItem.value });
-      newInventoryItem.value = { name: '', category: '', quantity: 1, location: '', datasheet: '' };
+      newInventoryItem.value = { name: '', category: '', quantity: 1, minStock: 2, location: '', datasheet: '' };
       showNewInventoryModal.value = false;
     };
 
@@ -317,7 +411,7 @@ createApp({
     };
 
     const moveToInventory = (shopItem) => {
-      inventory.value.push({ id: Date.now(), name: shopItem.name, category: 'Purchased Part', quantity: 1, location: 'Workbench', datasheet: '' });
+      inventory.value.push({ id: Date.now(), name: shopItem.name, category: 'Purchased Part', quantity: 1, minStock: 2, location: 'Workbench', datasheet: '' });
       shoppingList.value = shoppingList.value.filter(s => s.id !== shopItem.id);
     };
 
@@ -378,7 +472,24 @@ createApp({
       addCadModel,
       onDragStart,
       onDrop,
-      onStageSelectChange
+      onStageSelectChange,
+      stopwatchSeconds,
+      stopwatchRunning,
+      formatStopwatch,
+      toggleStopwatch,
+      ohmsVolts,
+      ohmsResistance,
+      calculatedAmps,
+      ledSourceV,
+      ledForwardV,
+      ledCurrentMa,
+      calculatedLedResistor,
+      serialConnected,
+      serialLogs,
+      serialInputText,
+      connectSerial,
+      disconnectSerial,
+      sendSerialCommand
     };
   }
 }).mount('#app');
