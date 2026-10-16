@@ -122,13 +122,13 @@ createApp({
 
     // STRICT COMPLETION ANIMATION TRIGGER: ONLY WHEN MOVED FROM NON-COMPLETED TO COMPLETED
     const changeProjectStage = (proj, newStage) => {
-      const previousStage = proj.status;
-      proj.status = newStage;
+        const previousStage = proj.status;
+        proj.status = newStage;
 
-      if (previousStage !== 'Completed' && newStage === 'Completed') {
-        proj.justCompleted = true;
-        setTimeout(() => { proj.justCompleted = false; }, 1500);
-      }
+        if (previousStage !== 'Completed' && newStage === 'Completed') {
+            proj.justCompleted = true;
+            setTimeout(() => { proj.justCompleted = false; }, 2200); // Extended for particle burst
+        }
     };
 
     // Sidebar Resizing
