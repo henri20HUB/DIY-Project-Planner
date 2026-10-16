@@ -33,18 +33,6 @@ createApp({
           { mcuPin: 'GPIO 4', componentPin: 'SDA', notes: 'I2C Data Line' },
           { mcuPin: 'GPIO 5', componentPin: 'SCL', notes: 'I2C Clock Line' }
         ]
-      },
-      {
-        id: 2,
-        title: 'Micro FPV Quadcopter',
-        category: 'Drone',
-        status: 'Planning',
-        description: 'A custom 2-inch ultra-light toothpick drone built around ExpressLRS (ELRS) protocol, 1103 brushless motors, and a 2S LiPo power setup for indoor/outdoor cinematic cruising.',
-        bom: [
-          { name: 'F4 12A AIO Flight Controller', qty: 1 },
-          { name: '1103 8000KV Brushless Motors', qty: 4 }
-        ],
-        pinouts: []
       }
     ]);
 
@@ -55,13 +43,11 @@ createApp({
     ]);
 
     const shoppingList = ref(JSON.parse(localStorage.getItem('maker_shopping')) || [
-      { id: 1, name: '2S 450mAh LiPo Battery (XT30)', price: '12.50', link: 'https://www.aliexpress.com' },
-      { id: 2, name: 'F4 12A AIO Flight Controller', price: '45.00', link: 'https://www.getfpv.com' }
+      { id: 1, name: '2S 450mAh LiPo Battery (XT30)', price: '12.50', link: 'https://www.aliexpress.com' }
     ]);
 
     const software = ref([
-      { id: 1, title: 'FastLED Animation Template', language: 'C++', description: 'Custom LED strip routines for ESP32', snippet: '#include <FastLED.h>' },
-      { id: 2, title: 'I2S Audio Streamer', language: 'C++', description: 'Captures raw audio from INMP441 mic', snippet: 'i2s_config_t i2s_config = { ... };' }
+      { id: 1, title: 'FastLED Animation Template', language: 'C++', description: 'Custom LED strip routines for ESP32', snippet: '#include <FastLED.h>' }
     ]);
 
     const ideas = ref([
@@ -72,6 +58,49 @@ createApp({
     const newBomPart = ref({ name: '', qty: 1 });
     const newInventoryItem = ref({ name: '', category: '', quantity: 1, location: '' });
     const newShoppingItem = ref({ name: '', price: '', link: '' });
+
+    // Category recommendations mapping
+    const categoryRecommendations = {
+      'Drone': [
+        { name: 'F4 12A AIO Flight Controller', qty: 1, selected: true },
+        { name: '1103 Brushless Motors', qty: 4, selected: true },
+        { name: '2S 450mAh LiPo Battery', qty: 2, selected: false }
+      ],
+      'Robotics': [
+        { name: 'Arduino Nano V3', qty: 1, selected: true },
+        { name: 'MG90S Servo Motor', qty: 2, selected: true },
+        { name: 'L298N Motor Driver', qty: 1, selected: false }
+      ],
+      'Smart Home / IoT': [
+        { name: 'ESP32-WROOM NodeMCU', qty: 1, selected: true },
+        { name: 'DHT22 Temp/Humidity Sensor', qty: 1, selected: true },
+        { name: 'Relay Module 1-Channel', qty: 1, selected: false }
+      ],
+      'AI Device': [
+        { name: 'Raspberry Pi Zero 2 W', qty: 1, selected: true },
+        { name: 'USB Mini Microphone', qty: 1, selected: true },
+        { name: 'OLED Display 0.96"', qty: 1, selected: false }
+      ],
+      'Display / Media': [
+        { name: 'ESP32 Display Board with TFT', qty: 1, selected: true },
+        { name: 'WS2812B Addressable LED Strip', qty: 1, selected: false }
+      ]
+    };
+
+    const recommendedOptions = ref([]);
+
+    const updateRecommendedParts = () => {
+      const list = categoryRecommendations[newProject.value.category] || [];
+      recommendedOptions.value = JSON.parse(JSON.stringify(list));
+    };
+
+    // Watch modal state to initialize category recommendations
+    watch(showNewProjectModal, (val) => {
+      if (val) {
+        newProject.value = { title: '', category: 'Robotics', status: 'In Progress', description: '' };
+        updateRecommendedParts();
+      }
+    });
 
     watch(projects, val => localStorage.setItem('maker_projects', JSON.stringify(val)), { deep: true });
     watch(inventory, val => localStorage.setItem('maker_inventory', JSON.stringify(val)), { deep: true });
@@ -170,9 +199,28 @@ createApp({
 
     const addProject = () => {
       if (!newProject.value.title) return;
-      projects.value.push({ id: Date.now(), ...newProject.value, bom: [], pinouts: [] });
-      newProject.value = { title: '', category: 'Robotics', status: 'In Progress', description: '' };
+      
+      // Gather checked recommendations
+      const selectedBom = recommendedOptions.value
+        .filter(rec => rec.selected)
+        .map(rec => ({ name: rec.name, qty: rec.qty }));
+
+      const newId = Date.now();
+      projects.value.unshift({
+        id: newId,
+        ...newProject.value,
+        bom: selectedBom,
+        pinouts: [],
+        justCreated: true
+      });
+
       showNewProjectModal.value = false;
+
+      // Remove the highlight animation flag after 3 seconds
+      setTimeout(() => {
+        const found = projects.value.find(p => p.id === newId);
+        if (found) found.justCreated = false;
+      }, 3000);
     };
 
     const confirmDelete = (type, id) => {
@@ -264,6 +312,8 @@ createApp({
       newBomPart,
       newInventoryItem,
       newShoppingItem,
+      recommendedOptions,
+      updateRecommendedParts,
       openProject,
       addProject,
       confirmDelete,

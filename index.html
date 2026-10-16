@@ -116,7 +116,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div v-for="project in filteredProjects" :key="project.id" 
                @click="openProject(project)"
-               class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 hover:border-slate-700 cursor-pointer transition flex flex-col justify-between group shadow-sm">
+               :class="project.justCreated ? 'ring-2 ring-cyan-400 shadow-lg shadow-cyan-500/20 bg-slate-900' : 'bg-slate-900/60 border border-slate-800'"
+               class="rounded-xl p-5 hover:border-slate-700 cursor-pointer transition-all duration-500 flex flex-col justify-between group shadow-sm">
             <div>
               <div class="flex items-center justify-between mb-3">
                 <span class="px-2.5 py-1 text-xs rounded-full font-medium border" 
@@ -401,20 +402,53 @@
       </div>
     </div>
 
-    <!-- MODAL: NEW PROJECT -->
+    <!-- MODAL: NEW PROJECT (WITH OPTIONAL RECOMMENDATIONS) -->
     <div v-if="showNewProjectModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-6 space-y-4 text-xs shadow-xl">
-        <div class="font-semibold text-slate-100 text-sm">Create New Project</div>
-        <input v-model="newProject.title" type="text" placeholder="Project Title" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none focus:border-cyan-500">
-        <select v-model="newProject.category" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none">
-          <option>Drone</option>
-          <option>Robotics</option>
-          <option>Smart Home / IoT</option>
-          <option>AI Device</option>
-          <option>Display / Media</option>
-        </select>
-        <textarea v-model="newProject.description" placeholder="Project description and goals..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none h-24"></textarea>
-        <div class="flex justify-end space-x-3">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-lg w-full p-6 space-y-4 text-xs shadow-xl">
+        <div class="font-semibold text-slate-100 text-sm flex items-center space-x-2">
+          <i data-lucide="plus-circle" class="w-4 h-4 text-cyan-400"></i>
+          <span>Create New Project</span>
+        </div>
+        
+        <div class="space-y-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Project Title</label>
+            <input v-model="newProject.title" type="text" placeholder="e.g., Autonomous Rover" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none focus:border-cyan-500">
+          </div>
+
+          <div>
+            <label class="block text-slate-400 mb-1">Category</label>
+            <select v-model="newProject.category" @change="updateRecommendedParts" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none">
+              <option>Drone</option>
+              <option>Robotics</option>
+              <option>Smart Home / IoT</option>
+              <option>AI Device</option>
+              <option>Display / Media</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-slate-400 mb-1">Description & Goals</label>
+            <textarea v-model="newProject.description" placeholder="Project specs and objective..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none h-20"></textarea>
+          </div>
+
+          <!-- Optional Recommended Parts Checklist -->
+          <div class="bg-slate-950/80 p-3 rounded-lg border border-slate-800/80 space-y-2">
+            <div class="text-cyan-400 font-medium flex items-center justify-between">
+              <span>Recommended Parts for {{ newProject.category }}</span>
+              <span class="text-[10px] text-slate-500">Optional (Check to include)</span>
+            </div>
+            <div class="space-y-1.5 max-h-32 overflow-y-auto">
+              <label v-for="(rec, rIdx) in recommendedOptions" :key="rIdx" class="flex items-center space-x-2 text-slate-300 hover:text-slate-100 cursor-pointer">
+                <input type="checkbox" v-model="rec.selected" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0">
+                <span class="flex-1 truncate">{{ rec.name }}</span>
+                <span class="text-slate-500 font-mono">Qty: {{ rec.qty }}</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end space-x-3 pt-2">
           <button @click="showNewProjectModal = false" class="text-slate-400">Cancel</button>
           <button @click="addProject" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium rounded-lg">Create Project</button>
         </div>
