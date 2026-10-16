@@ -15,6 +15,8 @@ createApp({
     const showAddPartToProjectModal = ref(false);
     const showNewInventoryModal = ref(false);
     const showNewShoppingModal = ref(false);
+    const showAddImageUrlModal = ref(false);
+    const newImageUrl = ref('');
     const deleteTarget = ref(null);
 
     const projects = ref(JSON.parse(localStorage.getItem('maker_projects')) || [
@@ -24,6 +26,7 @@ createApp({
         category: 'AI Device',
         status: 'In Progress',
         description: 'An independent desk companion featuring an ESP32-S3 microcontroller, INMP441 digital microphone, and a 1.3-inch OLED display. Streams voice queries over Wi-Fi to a local LLM server.',
+        images: [],
         bom: [
           { name: 'ESP32-S3 WROOM Module', qty: 1 },
           { name: 'INMP441 I2S Microphone', qty: 1 },
@@ -59,30 +62,30 @@ createApp({
     const newInventoryItem = ref({ name: '', category: '', quantity: 1, location: '' });
     const newShoppingItem = ref({ name: '', price: '', link: '' });
 
-    // Category recommendations mapping
+    // Category recommendations mapping (unselected by default)
     const categoryRecommendations = {
       'Drone': [
-        { name: 'F4 12A AIO Flight Controller', qty: 1, selected: true },
-        { name: '1103 Brushless Motors', qty: 4, selected: true },
+        { name: 'F4 12A AIO Flight Controller', qty: 1, selected: false },
+        { name: '1103 Brushless Motors', qty: 4, selected: false },
         { name: '2S 450mAh LiPo Battery', qty: 2, selected: false }
       ],
       'Robotics': [
-        { name: 'Arduino Nano V3', qty: 1, selected: true },
-        { name: 'MG90S Servo Motor', qty: 2, selected: true },
+        { name: 'Arduino Nano V3', qty: 1, selected: false },
+        { name: 'MG90S Servo Motor', qty: 2, selected: false },
         { name: 'L298N Motor Driver', qty: 1, selected: false }
       ],
       'Smart Home / IoT': [
-        { name: 'ESP32-WROOM NodeMCU', qty: 1, selected: true },
-        { name: 'DHT22 Temp/Humidity Sensor', qty: 1, selected: true },
+        { name: 'ESP32-WROOM NodeMCU', qty: 1, selected: false },
+        { name: 'DHT22 Temp/Humidity Sensor', qty: 1, selected: false },
         { name: 'Relay Module 1-Channel', qty: 1, selected: false }
       ],
       'AI Device': [
-        { name: 'Raspberry Pi Zero 2 W', qty: 1, selected: true },
-        { name: 'USB Mini Microphone', qty: 1, selected: true },
+        { name: 'Raspberry Pi Zero 2 W', qty: 1, selected: false },
+        { name: 'USB Mini Microphone', qty: 1, selected: false },
         { name: 'OLED Display 0.96"', qty: 1, selected: false }
       ],
       'Display / Media': [
-        { name: 'ESP32 Display Board with TFT', qty: 1, selected: true },
+        { name: 'ESP32 Display Board with TFT', qty: 1, selected: false },
         { name: 'WS2812B Addressable LED Strip', qty: 1, selected: false }
       ]
     };
@@ -94,7 +97,6 @@ createApp({
       recommendedOptions.value = JSON.parse(JSON.stringify(list));
     };
 
-    // Watch modal state to initialize category recommendations
     watch(showNewProjectModal, (val) => {
       if (val) {
         newProject.value = { title: '', category: 'Robotics', status: 'In Progress', description: '' };
@@ -106,7 +108,55 @@ createApp({
     watch(inventory, val => localStorage.setItem('maker_inventory', JSON.stringify(val)), { deep: true });
     watch(shoppingList, val => localStorage.setItem('maker_shopping', JSON.stringify(val)), { deep: true });
 
-    // Search Filtering Computeds
+    // Global Event Listener Resizing
+    const startResize = (e) => {
+      e.preventDefault();
+      isResizing.value = true;
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', stopResize);
+    };
+
+    const handleMouseMove = (e) => {
+      if (!isResizing.value) return;
+      if (e.clientX >= 180 && e.clientX <= 500) {
+        sidebarWidth.value = e.clientX;
+      }
+    };
+
+    const stopResize = () => {
+      isResizing.value = false;
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', stopResize);
+    };
+
+    // Project Images & Gallery Handlers
+    const uploadProjectImage = (event) => {
+      const file = event.target.files[0];
+      if (!file || !selectedProject.value) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (!selectedProject.value.images) selectedProject.value.images = [];
+        selectedProject.value.images.push(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    };
+
+    const addImageUrl = () => {
+      if (!newImageUrl.value || !selectedProject.value) return;
+      if (!selectedProject.value.images) selectedProject.value.images = [];
+      selectedProject.value.images.push(newImageUrl.value);
+      newImageUrl.value = '';
+      showAddImageUrlModal.value = false;
+    };
+
+    const removeProjectImage = (index) => {
+      if (selectedProject.value && selectedProject.value.images) {
+        selectedProject.value.images.splice(index, 1);
+      }
+    };
+
+    // Computeds
     const filteredProjects = computed(() => {
       if (!searchQuery.value) return projects.value;
       return projects.value.filter(p => p.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.value.toLowerCase()));
@@ -122,31 +172,14 @@ createApp({
       return shoppingList.value.filter(s => s.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
     });
 
-    // Sidebar Resizing Handlers
-    const onMouseDown = () => { isResizing.value = true; };
-    const onMouseMove = (e) => {
-      if (!isResizing.value) return;
-      if (e.clientX > 180 && e.clientX < 500) {
-        sidebarWidth.value = e.clientX;
-      }
-    };
-    const onMouseUp = () => { isResizing.value = false; };
-
-    // Smart Inventory Checker for BOM
     const checkInventoryStock = (partName) => {
       return inventory.value.some(item => item.name.toLowerCase().includes(partName.toLowerCase()) && item.quantity > 0);
     };
 
     const sendPartToShopping = (part) => {
-      shoppingList.value.push({
-        id: Date.now(),
-        name: part.name,
-        price: '0.00',
-        link: ''
-      });
+      shoppingList.value.push({ id: Date.now(), name: part.name, price: '0.00', link: '' });
     };
 
-    // Pinout Mapping Actions
     const addPinoutRow = () => {
       if (!selectedProject.value) return;
       if (!selectedProject.value.pinouts) selectedProject.value.pinouts = [];
@@ -159,13 +192,8 @@ createApp({
       }
     };
 
-    // JSON Backup & Restore
     const exportData = () => {
-      const backup = {
-        projects: projects.value,
-        inventory: inventory.value,
-        shoppingList: shoppingList.value
-      };
+      const backup = { projects: projects.value, inventory: inventory.value, shoppingList: shoppingList.value };
       const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -200,7 +228,6 @@ createApp({
     const addProject = () => {
       if (!newProject.value.title) return;
       
-      // Gather checked recommendations
       const selectedBom = recommendedOptions.value
         .filter(rec => rec.selected)
         .map(rec => ({ name: rec.name, qty: rec.qty }));
@@ -209,6 +236,7 @@ createApp({
       projects.value.unshift({
         id: newId,
         ...newProject.value,
+        images: [],
         bom: selectedBom,
         pinouts: [],
         justCreated: true
@@ -216,7 +244,6 @@ createApp({
 
       showNewProjectModal.value = false;
 
-      // Remove the highlight animation flag after 3 seconds
       setTimeout(() => {
         const found = projects.value.find(p => p.id === newId);
         if (found) found.justCreated = false;
@@ -307,6 +334,8 @@ createApp({
       showAddPartToProjectModal,
       showNewInventoryModal,
       showNewShoppingModal,
+      showAddImageUrlModal,
+      newImageUrl,
       deleteTarget,
       newProject,
       newBomPart,
@@ -329,9 +358,10 @@ createApp({
       removePinoutRow,
       exportData,
       importData,
-      onMouseDown,
-      onMouseMove,
-      onMouseUp
+      startResize,
+      uploadProjectImage,
+      addImageUrl,
+      removeProjectImage
     };
   }
 }).mount('#app');

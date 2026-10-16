@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="h-full flex flex-col font-sans grid-bg antialiased selection:bg-cyan-500/30 selection:text-cyan-200 overflow-hidden">
-  <div id="app" class="flex h-screen overflow-hidden select-none" @mousemove="onMouseMove" @mouseup="onMouseUp">
+  <div id="app" class="flex h-screen overflow-hidden select-none">
     
     <!-- Sidebar -->
     <aside :style="{ width: sidebarWidth + 'px' }" class="bg-slate-900/90 backdrop-blur border-r border-slate-800/80 flex flex-col justify-between shrink-0 relative">
@@ -88,7 +88,7 @@
       </div>
 
       <!-- Resizer Handle -->
-      <div @mousedown="onMouseDown" class="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-cyan-500/50 transition z-20"></div>
+      <div @mousedown="startResize" class="absolute top-0 right-0 w-2 h-full cursor-col-resize hover:bg-cyan-500/50 transition z-30"></div>
     </aside>
 
     <!-- Main Content Area -->
@@ -130,6 +130,12 @@
                 </span>
                 <span class="text-xs text-slate-400 font-medium">{{ project.category }}</span>
               </div>
+
+              <!-- Cover Image Preview -->
+              <div v-if="project.images && project.images.length > 0" class="mb-3 h-32 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-950">
+                <img :src="project.images[0]" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+              </div>
+
               <h3 class="font-semibold text-slate-100 mb-2 text-base group-hover:text-cyan-300 transition">{{ project.title }}</h3>
               <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-4">{{ project.description }}</p>
             </div>
@@ -174,7 +180,38 @@
           <p class="text-slate-300 text-xs leading-relaxed bg-slate-950/60 p-4 rounded-lg border border-slate-800/80 font-mono">{{ selectedProject.description }}</p>
         </div>
 
-        <!-- Project Bill of Materials (BOM) with Smart Inventory Check -->
+        <!-- Project Images & Gallery Section -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-6 space-y-4 shadow-sm">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-semibold text-slate-100 flex items-center space-x-2">
+              <i data-lucide="image" class="w-4 h-4 text-cyan-400"></i>
+              <span>Schematics & Photos Gallery</span>
+            </h3>
+            <div class="flex items-center space-x-2">
+              <label class="bg-slate-800 hover:bg-slate-700/80 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 cursor-pointer transition flex items-center space-x-1 font-medium">
+                <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                <span>Upload Image</span>
+                <input type="file" @change="uploadProjectImage" accept="image/*" class="hidden">
+              </label>
+              <button @click="showAddImageUrlModal = true" class="bg-slate-800 hover:bg-slate-700/80 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center space-x-1 font-medium">
+                <i data-lucide="link" class="w-3.5 h-3.5"></i>
+                <span>Add Image URL</span>
+              </button>
+            </div>
+          </div>
+
+          <div v-if="!selectedProject.images || selectedProject.images.length === 0" class="text-xs text-slate-400 italic py-3">No images uploaded for this project yet.</div>
+          <div v-else class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div v-for="(img, imgIdx) in selectedProject.images" :key="imgIdx" class="relative group rounded-lg overflow-hidden border border-slate-800 bg-slate-950 h-36">
+              <img :src="img" class="w-full h-full object-cover">
+              <button @click="removeProjectImage(imgIdx)" class="absolute top-2 right-2 bg-slate-950/80 text-rose-400 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition hover:bg-rose-500 hover:text-white">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project Bill of Materials (BOM) -->
         <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-6 space-y-4 shadow-sm">
           <div class="flex justify-between items-center">
             <h3 class="text-sm font-semibold text-slate-100 flex items-center space-x-2">
@@ -193,7 +230,6 @@
               <div class="flex items-center space-x-3">
                 <span class="text-slate-200 font-medium">{{ part.name }}</span>
                 <span class="text-slate-400">Qty: {{ part.qty }}</span>
-                <!-- Smart Status Badge -->
                 <span v-if="checkInventoryStock(part.name)" class="px-2 py-0.5 text-[10px] font-medium rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">In Stock</span>
                 <button v-else @click="sendPartToShopping(part)" class="px-2 py-0.5 text-[10px] font-medium rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition">Missing - Add to Wishlist</button>
               </div>
@@ -274,7 +310,7 @@
         </div>
       </section>
 
-      <!-- VIEW: NEEDED TO BUY (SHOPPING LIST & RECOMMENDATIONS) -->
+      <!-- VIEW: NEEDED TO BUY -->
       <section v-if="currentView === 'shopping'" class="max-w-6xl mx-auto space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-slate-800/60 pb-5 gap-4">
           <div>
@@ -290,32 +326,6 @@
               <i data-lucide="plus" class="w-4 h-4"></i>
               <span>Add Wishlist Item</span>
             </button>
-          </div>
-        </div>
-
-        <!-- Vendor Recommendations Card -->
-        <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-3 shadow-sm">
-          <div class="text-xs font-medium text-cyan-400 uppercase tracking-wider flex items-center space-x-2">
-            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-            <span>Trusted Hardware Vendors & Sourcing Directory</span>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
-            <a href="https://www.aliexpress.com" target="_blank" class="bg-slate-950/60 border border-slate-800/80 p-3 rounded-lg hover:border-cyan-500/40 transition block">
-              <div class="font-semibold text-slate-200 mb-1">AliExpress</div>
-              <div class="text-[11px] text-slate-400 leading-normal">Best for low-cost sensors, breakout boards, ESP32 modules, and hardware components.</div>
-            </a>
-            <a href="https://www.digikey.com" target="_blank" class="bg-slate-950/60 border border-slate-800/80 p-3 rounded-lg hover:border-cyan-500/40 transition block">
-              <div class="font-semibold text-slate-200 mb-1">DigiKey / Mouser</div>
-              <div class="text-[11px] text-slate-400 leading-normal">Industrial-grade authentic ICs, microcontrollers, resistors, and capacitors.</div>
-            </a>
-            <a href="https://www.getfpv.com" target="_blank" class="bg-slate-950/60 border border-slate-800/80 p-3 rounded-lg hover:border-cyan-500/40 transition block">
-              <div class="font-semibold text-slate-200 mb-1">GetFPV / BetaFPV</div>
-              <div class="text-[11px] text-slate-400 leading-normal">Specialized for drone parts, flight controllers, brushless motors, and LiPo batteries.</div>
-            </a>
-            <a href="https://www.adafruit.com" target="_blank" class="bg-slate-950/60 border border-slate-800/80 p-3 rounded-lg hover:border-cyan-500/40 transition block">
-              <div class="font-semibold text-slate-200 mb-1">Adafruit / SparkFun</div>
-              <div class="text-[11px] text-slate-400 leading-normal">Top-tier breakout boards with high quality tutorials and beginner-friendly guides.</div>
-            </a>
           </div>
         </div>
 
@@ -387,6 +397,18 @@
 
     </main>
 
+    <!-- MODAL: ADD IMAGE URL -->
+    <div v-if="showAddImageUrlModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-6 space-y-4 text-xs shadow-xl">
+        <div class="font-semibold text-slate-100 text-sm">Add Image URL</div>
+        <input v-model="newImageUrl" type="text" placeholder="https://example.com/schematic.png" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none focus:border-cyan-500">
+        <div class="flex justify-end space-x-3">
+          <button @click="showAddImageUrlModal = false" class="text-slate-400">Cancel</button>
+          <button @click="addImageUrl" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium rounded-lg">Add Image</button>
+        </div>
+      </div>
+    </div>
+
     <!-- MODAL: DELETE CONFIRMATION -->
     <div v-if="deleteTarget" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-sm w-full p-5 space-y-4 shadow-xl">
@@ -402,7 +424,7 @@
       </div>
     </div>
 
-    <!-- MODAL: NEW PROJECT (WITH OPTIONAL RECOMMENDATIONS) -->
+    <!-- MODAL: NEW PROJECT -->
     <div v-if="showNewProjectModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-lg w-full p-6 space-y-4 text-xs shadow-xl">
         <div class="font-semibold text-slate-100 text-sm flex items-center space-x-2">
@@ -432,7 +454,7 @@
             <textarea v-model="newProject.description" placeholder="Project specs and objective..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none h-20"></textarea>
           </div>
 
-          <!-- Optional Recommended Parts Checklist -->
+          <!-- Recommended Parts (UNCHECKED BY DEFAULT) -->
           <div class="bg-slate-950/80 p-3 rounded-lg border border-slate-800/80 space-y-2">
             <div class="text-cyan-400 font-medium flex items-center justify-between">
               <span>Recommended Parts for {{ newProject.category }}</span>
