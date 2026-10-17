@@ -5,65 +5,96 @@ createApp({
     const currentView = ref('guide');
     const selectedProject = ref(null);
     const searchQuery = ref('');
+    const activeDropdown = ref(null);
 
     // Resizable sidebar
     const sidebarWidth = ref(256);
     const isResizing = ref(false);
 
-    // Tutorial Chapters State
+    // Tutorial Product Timeline Steps State
     const tutorialStep = ref(0);
     const tutorialChapters = ref([
       {
-        title: 'Creating Projects & Assigning BOMs',
+        shortTitle: '1. Project Scoping',
+        title: 'Stage 1: Initial Product Scoping & BOM Definition',
         targetView: 'projects',
-        summary: 'Start by creating project cards on the Projects Dashboard. Set your target budget and select recommended components or manually edit BOM part lists directly in line.',
+        summary: 'Scenario: You want to build the "Smart Plant Hydration Hub"—an automated plant watering monitor with moisture sensors and a micro-pump. You begin on the Projects Dashboard by initializing the project with a $35 target budget.',
         actions: [
-          'Click "+ New Project" on the Projects Dashboard.',
-          'Set project goals, category, and target dollar limit.',
-          'Click into any created project to edit part names, quantities, and prices inline.'
-        ]
+          'Create project titled "Smart Plant Hydration Hub" under Category: Smart Home / IoT.',
+          'Set maximum budget limit to $35.00.',
+          'Assign initial BOM parts: ESP32-WROOM ($5.00) & Capacitive Moisture Sensor ($3.50).'
+        ],
+        interactiveAction: {
+          buttonText: 'Simulate Project Creation',
+          actionType: 'createSampleProject'
+        }
       },
       {
-        title: 'Managing Pipeline in Kanban',
-        targetView: 'kanban',
-        summary: 'Keep track of your active build stages using the drag-and-drop Kanban roadmap.',
-        actions: [
-          'Drag project cards from "Planning" to "Prototyping" or "Assembly".',
-          'Drop a card into "Completed" to trigger the celebration pulse & confetti emitter.',
-          'Alternatively, change stages instantly via the dropdown selector.'
-        ]
-      },
-      {
-        title: 'Hardware Inventory & Bin QR Labels',
+        shortTitle: '2. Inventory Sourcing',
+        title: 'Stage 2: Parts Bin Audit & Wishlist Procurement',
         targetView: 'inventory',
-        summary: 'Catalog all your loose ICs, sensors, and hardware parts while setting minimum safety stock thresholds.',
+        summary: 'Scenario: Checking your physical parts bin to see if you own the 5V Mini Submersible Water Pump. Your stock shows 0 pcs remaining, so MakerOS prompts an automatic wishlist entry in "Needed to Buy".',
         actions: [
-          'Add components with storage box locations (e.g., "Bin 3 - Motors").',
-          'Click the QR icon on any inventory row to display a printable storage label.',
-          'Items falling below safety limits automatically alert you to reorder.'
-        ]
+          'Audit inventory for "5V Submersible Pump".',
+          'Notice low-stock safety alert triggering.',
+          'Transfer part into procurement wishlist for ordering.'
+        ],
+        interactiveAction: {
+          buttonText: 'Add Pump to Wishlist',
+          actionType: 'addPumpWishlist'
+        }
       },
       {
-        title: 'Personalizing Manufacturing Methods',
+        shortTitle: '3. Fabrication Prep',
+        title: 'Stage 3: Manufacturing Method & 3D Print Setup',
         targetView: 'manufacturing',
-        summary: 'Customize the fabrication catalog to reflect your personal workshop capabilities.',
+        summary: 'Scenario: Setting up the enclosure design. You need a waterproof enclosure, so you select "FDM 3D Printing" and "Silicone Mold Casting" in your active workshop manufacturing directory.',
         actions: [
-          'Toggle checkboxes next to tools like 3D Printing, CNC Milling, or PCB Etching.',
-          'Add custom fabrication methods complete with tolerances and material notes.'
-        ]
+          'Ensure FDM 3D Printing is toggled active.',
+          'Attach CAD model URL from Printables with PLA 20% Gyroid Infill specs.'
+        ],
+        interactiveAction: {
+          buttonText: 'Enable Custom Silicone Method',
+          actionType: 'enableSilicone'
+        }
       },
       {
-        title: 'Calculators & Web Serial Interface',
+        shortTitle: '4. Hardware Wiring & Calc',
+        title: 'Stage 4: Circuit Math & Pinout Mapping',
         targetView: 'calculators',
-        summary: 'Leverage quick electronics math tools and connect hardware directly through USB.',
+        summary: 'Scenario: Before powering the moisture sensor LED indicator, you use the Component Calculator to compute the required current-limiting resistor for a 5V rail.',
         actions: [
-          'Calculate voltage drops, current, and required LED current-limiting resistors.',
-          'Switch to "Web Serial Terminal" to stream live USB serial logs from an ESP32 or Arduino.'
-        ]
+          'Input 5V Source Voltage & 2.1V Forward Voltage into LED calculator.',
+          'Verify calculated resistor requirement (145 Ω -> rounded to standard 150 Ω).',
+          'Map GPIO 32 to Moisture Sensor Analog Pin in the Wiring Matrix.'
+        ],
+        interactiveAction: {
+          buttonText: 'Run Resistor Calc Simulation',
+          actionType: 'calcSim'
+        }
+      },
+      {
+        shortTitle: '5. Assembly & Finalizing',
+        title: 'Stage 5: Kanban Pipeline Progression & Completion',
+        targetView: 'kanban',
+        summary: 'Scenario: Assembly is finished, firmware is flashed over Web Serial, and the plant hub is running! You move the project into the "Completed" stage.',
+        actions: [
+          'Drag card from "Assembly" column to "Completed".',
+          'Trigger grand success pulse and confetti particle celebration.',
+          'Generate shareable PDF/HTML project build report.'
+        ],
+        interactiveAction: {
+          buttonText: 'Complete Build & Celebrate',
+          actionType: 'completeSampleBuild'
+        }
       }
     ]);
 
     const currentChapter = computed(() => tutorialChapters.value[tutorialStep.value]);
+
+    const closeAllCustomDropdowns = () => {
+      activeDropdown.value = null;
+    };
 
     const nextTutorialStep = () => {
       if (tutorialStep.value < tutorialChapters.value.length - 1) tutorialStep.value++;
@@ -76,6 +107,52 @@ createApp({
     const jumpToSection = (viewName) => {
       currentView.value = viewName;
       selectedProject.value = null;
+    };
+
+    // Interactive Simulation Executor inside Tutorial
+    const triggerChapterSimulation = () => {
+      const type = currentChapter.value.interactiveAction?.actionType;
+      if (type === 'createSampleProject') {
+        const sampleId = Date.now();
+        projects.value.unshift({
+          id: sampleId,
+          title: 'Smart Plant Hydration Hub',
+          category: 'Smart Home / IoT',
+          status: 'Planning',
+          targetBudget: 35,
+          description: 'Automated plant soil moisture tracking and mini-pump irrigation unit.',
+          images: [],
+          cadModels: [],
+          bom: [
+            { name: 'ESP32-WROOM', qty: 1, price: 5.00 },
+            { name: 'Capacitive Moisture Sensor', qty: 1, price: 3.50 }
+          ],
+          pinouts: [{ mcuPin: 'GPIO 32', componentPin: 'AOUT', notes: 'Soil sensor analog output' }],
+          justCreated: true
+        });
+        alert('Sample Project "Smart Plant Hydration Hub" created! Opening project workspace...');
+        currentView.value = 'projects';
+      } else if (type === 'addPumpWishlist') {
+        shoppingList.value.push({ id: Date.now(), name: '5V Submersible Water Pump', price: '4.20', link: 'https://aliexpress.com' });
+        alert('Item "5V Submersible Water Pump" added to your Procurement Wishlist!');
+        currentView.value = 'shopping';
+      } else if (type === 'enableSilicone') {
+        const sil = manufacturingMethods.value.find(m => m.name.includes('Silicone'));
+        if (sil) sil.enabled = true;
+        alert('Silicone Mold Casting method activated in your manufacturing catalog!');
+        currentView.value = 'manufacturing';
+      } else if (type === 'calcSim') {
+        currentView.value = 'calculators';
+      } else if (type === 'completeSampleBuild') {
+        let plantProj = projects.value.find(p => p.title.includes('Plant'));
+        if (!plantProj) {
+          plantProj = projects.value[0];
+        }
+        if (plantProj) {
+          changeProjectStage(plantProj, 'Completed');
+          currentView.value = 'kanban';
+        }
+      }
     };
 
     // Drag and Drop state
@@ -278,7 +355,6 @@ createApp({
       changeProjectStage(draggedProject.value, targetStage);
       draggedProject.value = null;
     };
-    const onStageSelectChange = (proj, newStage) => { changeProjectStage(proj, newStage); };
 
     const changeProjectStage = (proj, newStage) => {
       const previousStage = proj.status;
@@ -481,12 +557,13 @@ createApp({
     };
 
     onMounted(() => { lucide.createIcons(); });
-    watch([currentView, selectedProject, deleteTarget, searchQuery, tutorialStep], () => { setTimeout(() => lucide.createIcons(), 50); });
+    watch([currentView, selectedProject, deleteTarget, searchQuery, tutorialStep, activeDropdown], () => { setTimeout(() => lucide.createIcons(), 50); });
 
     return {
       currentView,
       selectedProject,
       searchQuery,
+      activeDropdown,
       sidebarWidth,
       isResizing,
       projects,
@@ -537,7 +614,7 @@ createApp({
       addCadModel,
       onDragStart,
       onDrop,
-      onStageSelectChange,
+      changeProjectStage,
       stopwatchSeconds,
       stopwatchRunning,
       formatStopwatch,
@@ -560,7 +637,9 @@ createApp({
       currentChapter,
       nextTutorialStep,
       prevTutorialStep,
-      jumpToSection
+      jumpToSection,
+      triggerChapterSimulation,
+      closeAllCustomDropdowns
     };
   }
 }).mount('#app');

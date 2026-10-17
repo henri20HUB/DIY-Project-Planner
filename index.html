@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="h-full flex flex-col font-sans grid-bg antialiased selection:bg-cyan-500/30 selection:text-cyan-200 overflow-hidden">
-  <div id="app" class="flex h-screen overflow-hidden select-none">
+  <div id="app" class="flex h-screen overflow-hidden select-none" @click="closeAllCustomDropdowns">
     
     <!-- Sidebar -->
     <aside :style="{ width: sidebarWidth + 'px' }" class="bg-slate-900/90 backdrop-blur border-r border-slate-800/80 flex flex-col justify-between shrink-0 relative">
@@ -135,72 +135,103 @@
     <!-- Main Content -->
     <main class="flex-1 overflow-y-auto p-8">
       
-      <!-- VIEW: USER GUIDE & INTRO -->
+      <!-- VIEW: USER GUIDE & INTERACTIVE PRODUCT TIMELINE -->
       <section v-if="currentView === 'guide'" class="max-w-4xl mx-auto space-y-8 font-sans">
         
-        <!-- Header -->
         <div class="border-b border-slate-800/60 pb-5 space-y-2">
-          <div class="text-xs text-cyan-400 font-medium">Welcome to MakerOS</div>
-          <h2 class="text-2xl font-bold tracking-tight text-slate-100">Getting Started & Interactive Tutorial</h2>
-          <p class="text-xs text-slate-400 leading-relaxed">MakerOS is your all-in-one local engineering studio designed to help you plan hardware builds, manage component bins, calculate electrical specs, and track fabrication workflows.</p>
+          <div class="text-xs text-cyan-400 font-medium">Interactive Onboarding Studio</div>
+          <h2 class="text-2xl font-bold tracking-tight text-slate-100">End-to-End Product Creation Lifecycle Walkthrough</h2>
+          <p class="text-xs text-slate-400 leading-relaxed">Follow along with a complete product timeline: <strong>The Smart Plant Hydration Hub</strong>. Jump between chapters to see how MakerOS handles every stage from idea to final execution.</p>
         </div>
 
-        <!-- Interactive Chaptered Tutorial Hub -->
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-6 space-y-5 shadow-lg">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-4">
-            <div>
-              <span class="text-[11px] text-cyan-400 font-mono font-bold uppercase tracking-wider">Chapter {{ tutorialStep + 1 }} of {{ tutorialChapters.length }}</span>
-              <h3 class="text-base font-semibold text-slate-100 mt-0.5">{{ currentChapter.title }}</h3>
-            </div>
-            <!-- Quick Chapter Selection Dropdown -->
-            <div class="flex items-center space-x-2">
-              <span class="text-xs text-slate-400">Jump to:</span>
-              <select v-model="tutorialStep" class="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-cyan-300 font-medium focus:outline-none focus:border-cyan-500">
-                <option v-for="(chap, idx) in tutorialChapters" :key="idx" :value="idx">
-                  Ch {{ idx + 1 }}: {{ chap.title }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Chapter Content Box -->
-          <div class="space-y-4">
-            <p class="text-xs text-slate-300 leading-relaxed bg-slate-950/60 p-4 rounded-lg border border-slate-800/80 font-mono">
-              {{ currentChapter.summary }}
-            </p>
-
-            <div class="space-y-2">
-              <div class="text-xs font-semibold text-cyan-300 flex items-center space-x-1.5">
-                <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
-                <span>Key Actions in this Chapter:</span>
+        <!-- Interactive Chaptered Product Timeline Component -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-6 space-y-6 shadow-xl relative overflow-hidden">
+          
+          <!-- Timeline Progress Ribbon -->
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-4">
+            <div class="flex items-center space-x-3">
+              <div class="w-7 h-7 rounded-full bg-cyan-500/10 text-cyan-400 font-mono text-xs flex items-center justify-center font-bold border border-cyan-500/30">
+                {{ tutorialStep + 1 }}
               </div>
-              <ul class="space-y-1.5 pl-4 text-xs text-slate-300 list-disc marker:text-cyan-400">
-                <li v-for="(action, aIdx) in currentChapter.actions" :key="aIdx">{{ action }}</li>
-              </ul>
+              <div>
+                <span class="text-[10px] text-cyan-400 font-mono uppercase tracking-wider block">Timeline Stage {{ tutorialStep + 1 }} of {{ tutorialChapters.length }}</span>
+                <h3 class="text-sm font-bold text-slate-100">{{ currentChapter.title }}</h3>
+              </div>
+            </div>
+
+            <!-- CUSTOM STYLED CHAPTER SELECTOR DROPDOWN -->
+            <div class="relative" @click.stop>
+              <button @click="activeDropdown = activeDropdown === 'tutorial-chapter' ? null : 'tutorial-chapter'" class="bg-slate-950 border border-slate-800 hover:border-slate-700 px-3 py-1.5 rounded-lg text-xs font-mono text-slate-200 flex items-center space-x-2 transition shadow-sm">
+                <span>Ch {{ tutorialStep + 1 }}: {{ currentChapter.shortTitle }}</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+              </button>
+
+              <div v-if="activeDropdown === 'tutorial-chapter'" class="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl py-1 z-50 divide-y divide-slate-800/60 font-mono text-xs">
+                <div v-for="(chap, idx) in tutorialChapters" :key="idx" 
+                     @click="tutorialStep = idx; activeDropdown = null"
+                     :class="tutorialStep === idx ? 'bg-cyan-500/10 text-cyan-300 font-bold' : 'text-slate-300 hover:bg-slate-800/60'"
+                     class="px-3 py-2.5 cursor-pointer flex items-center justify-between transition">
+                  <span class="truncate">Stage {{ idx + 1 }}: {{ chap.shortTitle }}</span>
+                  <i v-if="tutorialStep === idx" data-lucide="check" class="w-3.5 h-3.5 text-cyan-400 shrink-0"></i>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Navigation Controls & Direct Jump Link -->
-          <div class="flex flex-col sm:flex-row justify-between items-center gap-3 pt-4 border-t border-slate-800/80">
-            <button @click="jumpToSection(currentChapter.targetView)" class="bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-3.5 py-2 rounded-lg text-xs font-medium transition flex items-center space-x-1.5">
-              <span>Try this view in MakerOS</span>
-              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-            </button>
+          <!-- Product Scenario Card -->
+          <div class="space-y-4">
+            <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800/80 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] text-cyan-400 font-mono font-semibold">Product Timeline Case Study:</span>
+                <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-400 font-mono">Sample Project #421</span>
+              </div>
+              <p class="text-xs text-slate-300 leading-relaxed font-sans">
+                {{ currentChapter.summary }}
+              </p>
+            </div>
 
-            <div class="flex items-center space-x-2">
-              <button @click="prevTutorialStep" :disabled="tutorialStep === 0" class="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 text-xs text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-700 transition">
-                Previous Chapter
-              </button>
-              <button @click="nextTutorialStep" :disabled="tutorialStep === tutorialChapters.length - 1" class="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition">
-                Next Chapter
+            <!-- Chapter Actions & Interactive Simulator -->
+            <div class="space-y-3">
+              <div class="text-xs font-semibold text-slate-200 flex items-center space-x-1.5">
+                <i data-lucide="list-checks" class="w-4 h-4 text-cyan-400"></i>
+                <span>Action Checklist for this Stage:</span>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono">
+                <div v-for="(act, aIdx) in currentChapter.actions" :key="aIdx" class="bg-slate-950/50 p-2.5 rounded-lg border border-slate-800/60 text-slate-300 flex items-start space-x-2">
+                  <span class="text-cyan-400 font-bold">•</span>
+                  <span>{{ act }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Simulator Action Button -->
+            <div v-if="currentChapter.interactiveAction" class="bg-slate-950 p-3 rounded-lg border border-cyan-500/30 flex items-center justify-between">
+              <span class="text-xs text-slate-300 font-mono">Test this step in MakerOS:</span>
+              <button @click="triggerChapterSimulation" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium px-3 py-1.5 rounded text-xs transition flex items-center space-x-1.5">
+                <i data-lucide="play" class="w-3 h-3"></i>
+                <span>{{ currentChapter.interactiveAction.buttonText }}</span>
               </button>
             </div>
+          </div>
+
+          <!-- Navigation Bar -->
+          <div class="flex justify-between items-center pt-4 border-t border-slate-800/80">
+            <button @click="prevTutorialStep" :disabled="tutorialStep === 0" class="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 text-xs text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-700 transition">
+              Previous Stage
+            </button>
+            <button @click="jumpToSection(currentChapter.targetView)" class="text-xs text-cyan-400 hover:underline flex items-center space-x-1 font-medium">
+              <span>View Directory</span>
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </button>
+            <button @click="nextTutorialStep" :disabled="tutorialStep === tutorialChapters.length - 1" class="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition">
+              Next Stage
+            </button>
           </div>
         </div>
 
-        <!-- Preserved Module Feature Overview -->
+        <!-- Module Feature Breakdown -->
         <div class="border-t border-slate-800/80 pt-6 space-y-4">
-          <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-wider text-xs">Module Breakdown & Capability Overview</h3>
+          <h3 class="text-xs font-semibold text-slate-200 uppercase tracking-wider">Module Capabilities Reference</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-mono">
             <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-3">
               <div class="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
@@ -307,12 +338,12 @@
         </div>
       </section>
 
-      <!-- VIEW: KANBAN ROADMAP -->
+      <!-- VIEW: KANBAN ROADMAP WITH CUSTOM STYLED SELECT DROPDOWNS -->
       <section v-if="currentView === 'kanban'" class="max-w-7xl mx-auto space-y-6">
         <div class="border-b border-slate-800/60 pb-5">
           <div class="text-xs text-cyan-400 font-medium mb-1">Project Roadmap</div>
           <h2 class="text-xl font-semibold tracking-tight text-slate-100">Kanban Build Pipeline</h2>
-          <p class="text-xs text-slate-400 mt-1">Drag and drop cards between columns or use the dropdown selectors.</p>
+          <p class="text-xs text-slate-400 mt-1">Drag and drop cards between columns or use the custom dropdown selectors.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -330,7 +361,7 @@
                    draggable="true"
                    @dragstart="onDragStart(proj)"
                    :class="proj.justCompleted ? 'animate-celebration border-emerald-500/50 bg-slate-900/90' : 'bg-slate-900 border-slate-800'"
-                   class="border p-3.5 rounded-lg space-y-2 cursor-grab active:cursor-grabbing hover:border-cyan-500/50 transition transform hover:-translate-y-0.5 shadow-sm">
+                   class="border p-3.5 rounded-lg space-y-2 cursor-grab active:cursor-grabbing hover:border-cyan-500/50 transition transform hover:-translate-y-0.5 shadow-sm relative">
                 
                 <div class="flex items-center justify-between">
                   <div class="font-medium text-xs text-slate-100">{{ proj.title }}</div>
@@ -341,12 +372,26 @@
 
                 <div class="flex justify-between items-center pt-2 text-[10px] text-slate-500 border-t border-slate-800/60">
                   <span>{{ proj.category }}</span>
-                  <select :value="proj.status" @change="onStageSelectChange(proj, $event.target.value)" class="bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 text-slate-300 text-[10px] focus:outline-none">
-                    <option>Planning</option>
-                    <option>Prototyping</option>
-                    <option>Assembly</option>
-                    <option>Completed</option>
-                  </select>
+
+                  <!-- CUSTOM STYLED VUE DROPDOWN COMPONENT FOR KANBAN -->
+                  <div class="relative" @click.stop>
+                    <button @click="activeDropdown = activeDropdown === 'kanban-' + proj.id ? null : 'kanban-' + proj.id" 
+                            class="bg-slate-950 border border-slate-800 hover:border-slate-700 px-2 py-0.5 rounded text-slate-300 text-[10px] flex items-center space-x-1 transition">
+                      <span>{{ proj.status }}</span>
+                      <i data-lucide="chevron-down" class="w-3 h-3 text-slate-500"></i>
+                    </button>
+
+                    <div v-if="activeDropdown === 'kanban-' + proj.id" class="absolute right-0 mt-1 w-32 bg-slate-900 border border-slate-800 rounded-lg shadow-xl py-1 z-50 divide-y divide-slate-800/60 font-mono text-[10px]">
+                      <div v-for="s in ['Planning', 'Prototyping', 'Assembly', 'Completed']" :key="s"
+                           @click="changeProjectStage(proj, s); activeDropdown = null"
+                           :class="proj.status === s ? 'text-cyan-400 font-bold bg-slate-800/50' : 'text-slate-300 hover:bg-slate-800/40'"
+                           class="px-2.5 py-1.5 cursor-pointer flex items-center justify-between transition">
+                        <span>{{ s }}</span>
+                        <i v-if="proj.status === s" data-lucide="check" class="w-3 h-3 text-cyan-400 shrink-0"></i>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>
@@ -776,13 +821,23 @@
         
         <div class="space-y-3">
           <input v-model="newProject.title" type="text" placeholder="Project Title" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none focus:border-cyan-500">
-          <select v-model="newProject.category" @change="updateRecommendedParts" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none">
-            <option>Drone</option>
-            <option>Robotics</option>
-            <option>Smart Home / IoT</option>
-            <option>AI Device</option>
-            <option>Display / Media</option>
-          </select>
+          
+          <!-- CUSTOM DROPDOWN FOR PROJECT CATEGORY -->
+          <div class="relative" @click.stop>
+            <label class="text-slate-400 block mb-1">Category</label>
+            <button @click="activeDropdown = activeDropdown === 'modal-cat' ? null : 'modal-cat'" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 p-2.5 rounded-lg text-slate-100 flex justify-between items-center transition">
+              <span>{{ newProject.category }}</span>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+            </button>
+            <div v-if="activeDropdown === 'modal-cat'" class="absolute left-0 mt-1 w-full bg-slate-900 border border-slate-800 rounded-lg shadow-xl py-1 z-50 font-mono">
+              <div v-for="cat in ['Drone', 'Robotics', 'Smart Home / IoT', 'AI Device', 'Display / Media']" :key="cat"
+                   @click="newProject.category = cat; updateRecommendedParts(); activeDropdown = null"
+                   class="px-3 py-2 cursor-pointer hover:bg-slate-800 text-slate-200">
+                {{ cat }}
+              </div>
+            </div>
+          </div>
+
           <input v-model.number="newProject.targetBudget" type="number" placeholder="Target Budget ($ limit)" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none">
           <textarea v-model="newProject.description" placeholder="Description & goals..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none h-20"></textarea>
 
