@@ -31,17 +31,6 @@
 
         <nav class="p-3 space-y-4 font-medium text-xs">
           
-          <!-- Category: Knowledge & Onboarding -->
-          <div class="space-y-1">
-            <div class="px-3 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">Knowledge</div>
-            <button @click="currentView = 'guide'; selectedProject = null" 
-                    :class="currentView === 'guide' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
-                    class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200">
-              <i data-lucide="sparkles" class="w-4 h-4 shrink-0"></i>
-              <span class="truncate">Interactive Masterclass</span>
-            </button>
-          </div>
-
           <!-- Category: Engineering Management -->
           <div class="space-y-1">
             <div class="px-3 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">Management</div>
@@ -86,6 +75,24 @@
                     class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200">
               <i data-lucide="terminal" class="w-4 h-4 shrink-0"></i>
               <span class="truncate">Web Serial Console</span>
+            </button>
+          </div>
+
+          <!-- Category: Knowledge (At Bottom) -->
+          <div class="space-y-1 pt-2 border-t border-slate-800/80">
+            <div class="px-3 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">Knowledge</div>
+            <button @click="currentView = 'guide'; selectedProject = null" 
+                    :class="currentView === 'guide' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
+                    class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200">
+              <i data-lucide="sparkles" class="w-4 h-4 shrink-0"></i>
+              <span class="truncate">Interactive Masterclass</span>
+            </button>
+
+            <button @click="currentView = 'lexicon'; selectedProject = null" 
+                    :class="currentView === 'lexicon' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
+                    class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200">
+              <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i>
+              <span class="truncate">Parts Directory & Lexicon</span>
             </button>
           </div>
 
@@ -240,6 +247,33 @@
             <button @click="nextTutorialStep" :disabled="tutorialStep === tutorialChapters.length - 1" class="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition shadow-lg shadow-cyan-500/20">
               Next Module
             </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: PARTS DIRECTORY & LEXICON (NEW) -->
+      <section v-if="currentView === 'lexicon'" class="max-w-5xl mx-auto space-y-6 animate-fade-in">
+        <div class="border-b border-slate-800 pb-4">
+          <h2 class="text-xl font-bold text-slate-100 tracking-tight">Parts Lexicon & Directory</h2>
+          <p class="text-xs text-slate-400">Hardware & software encyclopedia for common maker components.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div v-for="part in lexiconParts" :key="part.id" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 shadow-lg">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 uppercase font-bold">{{ part.category }}</span>
+                <h3 class="text-base font-bold text-slate-100 mt-1">{{ part.name }}</h3>
+              </div>
+              <span class="text-xs text-emerald-400 font-mono font-semibold">{{ part.avgCost }}</span>
+            </div>
+
+            <p class="text-xs text-slate-300 font-sans leading-relaxed">{{ part.description }}</p>
+
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 font-mono text-xs space-y-1.5 text-slate-400">
+              <div><strong class="text-slate-200">Ideal For:</strong> {{ part.bestFor }}</div>
+              <div><strong class="text-slate-200">Key Specs:</strong> {{ part.specs }}</div>
+            </div>
           </div>
         </div>
       </section>

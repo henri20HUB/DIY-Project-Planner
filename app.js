@@ -2,6 +2,7 @@ const { createApp, ref, computed, onMounted, watch } = Vue;
 
 createApp({
   setup() {
+    // Defaults to Interactive Masterclass ('guide') when visiting for the first time
     const currentView = ref('guide');
     const selectedProject = ref(null);
     const showNewProjectModal = ref(false);
@@ -61,6 +62,45 @@ createApp({
           'Live serial streaming monitor',
           'Command input line to send serial payloads'
         ]
+      }
+    ]);
+
+    const lexiconParts = ref([
+      {
+        id: 1,
+        name: 'ESP32-S3 Microcontroller',
+        category: 'Microcontrollers',
+        avgCost: '$4.50 - $7.00',
+        description: 'Dual-core 240MHz MCU with native Wi-Fi, Bluetooth 5 (LE), and vector instructions for lightweight neural networks.',
+        bestFor: 'IoT Devices, Smart Home, Edge AI, Audio Streaming',
+        specs: '240MHz / 512KB SRAM / USB-OTG / I2S & Camera Support'
+      },
+      {
+        id: 2,
+        name: 'Raspberry Pi Pico W',
+        category: 'Microcontrollers',
+        avgCost: '$6.00',
+        description: 'RP2040 chip with dual ARM Cortex-M0+ cores and Infineon CYW43439 wireless chip.',
+        bestFor: 'Beginner Projects, MicroPython / C++ Learning, USB HID Devices',
+        specs: '133MHz / 264KB SRAM / Programmable I/O (PIO)'
+      },
+      {
+        id: 3,
+        name: 'NEMA 17 Stepper Motor',
+        category: 'Actuators & Motors',
+        avgCost: '$12.00 - $16.00',
+        description: 'Precision brushless motor that divides a full rotation into equal discrete steps.',
+        bestFor: '3D Printers, CNC Mills, Robotic Arms, Precision Linear Motion',
+        specs: '1.8° Step Angle / 200 Steps/Rev / Requires A4988/TMC2209 Driver'
+      },
+      {
+        id: 4,
+        name: 'SG90 Micro Servo (9g)',
+        category: 'Actuators & Motors',
+        avgCost: '$2.00',
+        description: 'Tiny positional motor capable of ~180 degree rotation via PWM signal pulses.',
+        bestFor: 'RC Planes, Robotic Grippers, Pan/Tilt Camera Mounts',
+        specs: '1.8 kg/cm Torque / 4.8V Operating Range / PWM Controlled'
       }
     ]);
 
@@ -292,7 +332,7 @@ createApp({
 
     const exportData = () => {
       const backup = { projects: projects.value, inventory: inventory.value, shoppingList: shoppingList.value };
-      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json'});
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -359,6 +399,7 @@ createApp({
       onStageSelectChange,
       tutorialStep,
       tutorialChapters,
+      lexiconParts,
       currentChapter,
       nextTutorialStep,
       prevTutorialStep,
