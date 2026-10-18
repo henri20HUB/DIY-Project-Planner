@@ -65,7 +65,7 @@ createApp({
       }
     ]);
 
-    // Enhanced Parts Lexicon with Categories, Descriptions, How-it-works, and Images
+    // Enhanced Specific Hardware Lexicon with rigorous real part imagery and smaller parts categories
     const lexiconSearch = ref('');
     const lexiconCategories = ref([
       {
@@ -73,35 +73,110 @@ createApp({
         title: 'Microcomputers & Microcontrollers',
         icon: 'cpu',
         isOpen: true,
-        overview: 'The brain of your project. MCUs process logic, read sensors, and control actuators, while single-board computers run full Linux operating systems.',
-        howItWorks: 'Code is compiled and flashed onto flash memory. GPIO pins handle digital and analog signals, communicating via protocols like I2C, SPI, and UART.',
+        overview: 'The computational cores of embedded systems. MCUs execute deterministic low-level firmware tasks, while SBCs manage full operating systems.',
+        howItWorks: 'Firmware executes in onboard flash memory. General Purpose Input/Output (GPIO) pins interface with peripherals using SPI, I2C, or UART protocols.',
         items: [
           {
-            name: 'ESP32-S3 Module',
+            name: 'ESP32-S3 DevKit Module',
             category: 'Microcontroller',
-            avgCost: '$5.50',
-            description: 'Powerful dual-core Xtensa MCU with integrated Wi-Fi and Bluetooth 5 LE.',
-            bestFor: 'IoT dashboards, wireless data logging, smart home devices.',
-            specs: '240MHz / 512KB SRAM / USB-OTG',
-            image: 'https://images.unsplash.com/photo-1603732551681-2e9146399c15?auto=format&fit=crop&w=400&q=80'
+            avgCost: '$6.50',
+            description: 'Dual-core 240MHz Xtensa processor featuring native Wi-Fi, BLE 5, and vector extension instructions for edge processing.',
+            bestFor: 'IoT telemetry gateways, wireless devices, and smart automation hardware.',
+            specs: '240MHz / 512KB SRAM / USB-OTG / 2.4GHz Wi-Fi',
+            image: 'https://images.unsplash.com/photo-1603732551681-2e9146399c15?auto=format&fit=crop&w=500&q=80'
           },
           {
             name: 'Raspberry Pi Pico W',
             category: 'Microcontroller',
             avgCost: '$6.00',
-            description: 'RP2040 dual-core ARM Cortex-M0+ processor with onboard wireless chip.',
-            bestFor: 'MicroPython scripting, USB device emulation, low-cost automation.',
-            specs: '133MHz / 264KB SRAM / PIO state machines',
-            image: 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=400&q=80'
+            description: 'RP2040 silicon board featuring dual ARM Cortex-M0+ cores and an integrated Infineon Wi-Fi/BLE chip.',
+            bestFor: 'MicroPython scripting, custom USB Human Interface Devices (HID), and educational IoT.',
+            specs: '133MHz / 264KB SRAM / Programmable I/O (PIO)',
+            image: 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=500&q=80'
+          }
+        ]
+      },
+      {
+        id: 'passives',
+        title: 'Passive Components (Resistors & Capacitors)',
+        icon: 'sliders',
+        isOpen: false,
+        overview: 'Essential foundational elements that do not source power but shape voltage, limit current, filter noise, and stabilize power rails.',
+        howItWorks: 'Resistors restrict current flow following Ohm’s law ($V=IR$). Capacitors temporarily store and discharge electrostatic energy to smooth voltage ripple.',
+        items: [
+          {
+            name: 'Carbon Film Resistor Kit (1/4W, 10Ω - 1MΩ)',
+            category: 'Passive Component',
+            avgCost: '$7.00',
+            description: 'Standard through-hole axial resistors used for current limiting, pull-up/pull-down lines, and voltage division.',
+            bestFor: 'LED current limiting, transistor biasing, logic line default states.',
+            specs: '5% Tolerance / 0.25 Watt rating / Standard axial lead',
+            image: 'https://images.unsplash.com/photo-1593508512255-86ab42a8e620?auto=format&fit=crop&w=500&q=80'
           },
           {
-            name: 'Arduino Nano V3',
-            category: 'Microcontroller',
+            name: 'Electrolytic & Ceramic Decoupling Capacitors',
+            category: 'Passive Component',
+            avgCost: '$5.50',
+            description: 'Energy storage cells placed across power input rails to filter out high-frequency electrical noise and transient voltage spikes.',
+            bestFor: 'Power supply filtering, motor noise suppression, timing oscillator circuits.',
+            specs: 'Values ranging from 22pF to 470uF / Various voltage ratings',
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=500&q=80'
+          }
+        ]
+      },
+      {
+        id: 'wiring',
+        title: 'Wiring, Cables & Interconnects',
+        icon: 'git-commit',
+        isOpen: false,
+        overview: 'The physical nervous system connecting power supplies, data buses, shields, and peripheral modules together.',
+        howItWorks: 'Multi-strand copper conductors coated in flexible PVC/silicone insulation minimize resistance and mechanical fatigue during movement.',
+        items: [
+          {
+            name: 'Dupont Jumper Wire Bundle (Male-to-Female/Male-to-Male)',
+            category: 'Interconnect',
             avgCost: '$4.00',
-            description: 'Classic ATmega328P compact board popular for breadboard prototyping.',
-            bestFor: 'Simple sensor nodes, beginner robotics, robust 5V logic projects.',
-            specs: '16MHz / 32KB Flash / 2KB SRAM / 5V Logic',
-            image: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=400&q=80'
+            description: 'Flexible multi-colored ribbon wires with pre-crimped pin headers for quick breadboard and header pin interfacing.',
+            bestFor: 'Prototyping sensors, connecting breakout boards to microcontroller pins.',
+            specs: '20cm length / 40-pin ribbon / 2.54mm standard pitch',
+            image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=500&q=80'
+          },
+          {
+            name: 'USB-C to Data/Power Shielded Cable',
+            category: 'Cable',
+            avgCost: '$6.00',
+            description: 'Heavy-gauge shielded copper cable supporting high-speed serial data transmission and high-current power delivery.',
+            bestFor: 'Flashing microcontrollers, debugging via Web Serial, powering bench circuits.',
+            specs: 'USB 2.0/3.1 high-speed data pairs / Foil shield drain wire',
+            image: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=500&q=80'
+          }
+        ]
+      },
+      {
+        id: 'proto',
+        title: 'Prototyping Boards (Breadboards & PCBs)',
+        icon: 'grid',
+        isOpen: false,
+        overview: 'Platforms used to build temporary or permanent electronic circuits without immediately fabricating custom circuit boards.',
+        howItWorks: 'Breadboards use internal spring-clip rows for solderless plug-and-play prototyping. Solder/perf boards and PCBs use copper traces to permanently connect soldered components.',
+        items: [
+          {
+            name: 'Solderless Breadboard (830 Tie Points)',
+            category: 'Prototyping',
+            avgCost: '$3.50',
+            description: 'Reusable plastic block with internal interconnecting metal spring clips arranged in rows and power distribution rails.',
+            bestFor: 'Initial circuit layout, testing schematic behavior before soldering.',
+            specs: '830 tie points / Dual power rails / Adhesive foam backing',
+            image: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=500&q=80'
+          },
+          {
+            name: 'Double-Sided Prototype Perf Boards & Custom PCBs',
+            category: 'PCB',
+            avgCost: '$5.00',
+            description: 'FR4 fiberglass boards with plated through-holes allowing makers to solder components into permanent layouts.',
+            bestFor: 'Finalizing breadboard circuits into robust, permanent hardware modules.',
+            specs: 'FR4 material / 1.6mm thickness / 2.54mm grid hole spacing',
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=500&q=80'
           }
         ]
       },
@@ -110,26 +185,26 @@ createApp({
         title: 'Motors & Actuators',
         icon: 'activity',
         isOpen: false,
-        overview: 'Convert electrical energy into mechanical motion, enabling robots, CNC machines, and automated mechanisms to move physical objects.',
-        howItWorks: 'Steppers move in discrete angular steps for precision; servos use internal feedback loops to hold exact angles; DC motors spin continuously when powered.',
+        overview: 'Electromechanical devices that translate electrical currents into precise angular or linear mechanical work.',
+        howItWorks: 'Steppers energize internal electromagnetic stator coils sequentially to lock onto specific step increments; servos use internal feedback circuits to lock positions.',
         items: [
           {
             name: 'NEMA 17 Stepper Motor',
-            category: 'Stepper Motor',
+            category: 'Actuator',
             avgCost: '$14.00',
-            description: 'Standard 4-wire bipolar stepper motor providing high holding torque at low speeds.',
-            bestFor: '3D printers, CNC routers, linear slides, precision positioning.',
-            specs: '1.8° Step Angle (200 steps/rev) / 1.5A per phase',
-            image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=400&q=80'
+            description: 'Hybrid bipolar stepper motor capable of high holding torque with precise 1.8-degree step increments.',
+            bestFor: '3D printers, CNC positioning stages, and automated linear actuators.',
+            specs: '1.8° Step Angle (200 steps/rev) / 1.2A rating',
+            image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=500&q=80'
           },
           {
             name: 'SG90 Micro Servo (9g)',
-            category: 'Servo Motor',
+            category: 'Actuator',
             avgCost: '$2.50',
-            description: 'Lightweight rotational servo motor controlled via PWM pulses (typically 0 to 180 degrees).',
-            bestFor: 'RC steering, miniature robot grippers, camera pan/tilt mechanisms.',
-            specs: '1.8 kg/cm stall torque / 4.8V DC operating voltage',
-            image: 'https://images.unsplash.com/photo-1563770660941-20978e870e26?auto=format&fit=crop&w=400&q=80'
+            description: 'Compact rotary actuator containing a DC motor, reduction gearbox, and control feedback potentiometer.',
+            bestFor: 'Robotic grippers, mechanism steering flaps, and camera pan/tilt brackets.',
+            specs: '1.8 kg/cm torque / 4.8V DC operating limit',
+            image: 'https://images.unsplash.com/photo-1563770660941-20978e870e26?auto=format&fit=crop&w=500&q=80'
           }
         ]
       },
@@ -138,54 +213,17 @@ createApp({
         title: 'Sensors & Transducers',
         icon: 'gauge',
         isOpen: false,
-        overview: 'The eyes and ears of your electronics. Sensors detect environmental metrics like temperature, distance, motion, gas, and light.',
-        howItWorks: 'Physical changes (resistance, capacitance, optical interruption) are converted into analog voltage levels or digital packets sent over I2C/SPI.',
+        overview: 'Transducers that capture environmental physical attributes and convert them into readable electrical signals.',
+        howItWorks: 'Internal sensing elements experience physical changes (e.g., capacitance or optical breaks) translated into digital data values.',
         items: [
           {
             name: 'BME280 Environmental Sensor',
             category: 'Sensor',
             avgCost: '$5.00',
-            description: 'Precision digital sensor measuring temperature, barometric pressure, and relative humidity.',
-            bestFor: 'Weather stations, altimeters, indoor climate monitors.',
-            specs: 'I2C/SPI Interface / ±1°C Temp Accuracy / Ultra-low power',
-            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=400&q=80'
-          },
-          {
-            name: 'HC-SR04 Ultrasonic Distance Sensor',
-            category: 'Sensor',
-            avgCost: '$1.50',
-            description: 'Uses sonar echolocation to calculate distance to solid objects by measuring sound wave bounce time.',
-            bestFor: 'Obstacle-avoiding robots, fluid level monitoring, proximity alarms.',
-            specs: '2cm to 400cm range / 5V TTL / 15° measuring angle',
-            image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=400&q=80'
-          }
-        ]
-      },
-      {
-        id: 'displays',
-        title: 'Displays & Lighting (LEDs)',
-        icon: 'sun',
-        isOpen: false,
-        overview: 'Provide visual telemetry, debugging readouts, and aesthetic lighting effects for user interfaces.',
-        howItWorks: 'OLED panels light individual self-illuminating pixels without backlights; addressable LEDs (WS2812B) daisy-chain data signals to control RGB color per pixel.',
-        items: [
-          {
-            name: '1.3" I2C OLED Display (128x64)',
-            category: 'Display',
-            avgCost: '$4.50',
-            description: 'High-contrast monochrome organic LED screen communicating over 2-wire I2C.',
-            bestFor: 'Menu systems, real-time sensor graphs, portable device status screens.',
-            specs: 'SSD1306 Driver / White or Blue pixels / 3.3V-5V tolerant',
-            image: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=400&q=80'
-          },
-          {
-            name: 'WS2812B Addressable LED Strip (1m / 60 LEDs)',
-            category: 'Lighting',
-            avgCost: '$9.00',
-            description: 'Flexible silicone strip where every single LED has an embedded driver chip for custom color chases.',
-            bestFor: 'Ambient case lighting, status indicator rings, reactive visual art pieces.',
-            specs: '5V DC / 24-bit color control / Single data line protocol',
-            image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=400&q=80'
+            description: 'High-precision digital sensor measuring barometric pressure, ambient temperature, and humidity simultaneously.',
+            bestFor: 'Weather stations, indoor environmental trackers, and altitude logging.',
+            specs: 'I2C / SPI communication / Low current consumption',
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=500&q=80'
           }
         ]
       }
@@ -195,7 +233,6 @@ createApp({
       if (!lexiconSearch.value) return lexiconCategories.value;
       const q = lexiconSearch.value.toLowerCase();
       
-      // Return categories that match query or contain matching items
       return lexiconCategories.value.map(cat => {
         const matchingItems = cat.items.filter(item => 
           item.name.toLowerCase().includes(q) || 

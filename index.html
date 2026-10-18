@@ -25,7 +25,7 @@
           </div>
           <div class="overflow-hidden">
             <h1 class="font-bold text-slate-100 text-sm tracking-tight truncate">MakerOS</h1>
-            <p class="text-[11px] text-slate-400 font-mono tracking-wide">STUDIO v2.5</p>
+            <p class="text-[11px] text-slate-400 font-mono tracking-wide">STUDIO v2.6</p>
           </div>
         </div>
 
@@ -251,17 +251,17 @@
         </div>
       </section>
 
-      <!-- VIEW: PARTS DIRECTORY & LEXICON (ENHANCED) -->
+      <!-- VIEW: PARTS DIRECTORY & LEXICON (SPECIFIC HARDWARE LEXICON) -->
       <section v-if="currentView === 'lexicon'" class="max-w-5xl mx-auto space-y-6 animate-fade-in">
         <div class="border-b border-slate-800 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
           <div>
             <h2 class="text-xl font-bold text-slate-100 tracking-tight">Parts Directory & Lexicon</h2>
-            <p class="text-xs text-slate-400">Comprehensive hardware & software encyclopedia. Click any section header to collapse or expand.</p>
+            <p class="text-xs text-slate-400">Strict component specs, behavior principles, and direct wishlist tools for your engineering bench.</p>
           </div>
           <!-- Quick Filter Search -->
           <div class="relative w-full sm:w-64">
             <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-3 top-3"></i>
-            <input v-model="lexiconSearch" type="text" placeholder="Filter components..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 font-mono">
+            <input v-model="lexiconSearch" type="text" placeholder="Search resistors, MCUs, buses..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 font-mono">
           </div>
         </div>
 
@@ -275,7 +275,7 @@
                 <div class="flex items-center space-x-2">
                   <i :data-lucide="cat.icon" class="w-4 h-4 text-cyan-400"></i>
                   <h3 class="text-base font-bold text-slate-100">{{ cat.title }}</h3>
-                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">{{ cat.items.length }} parts</span>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">{{ cat.items.length }} entries</span>
                 </div>
                 <p class="text-xs text-slate-400 font-sans leading-relaxed">{{ cat.overview }}</p>
               </div>
@@ -290,7 +290,7 @@
               <!-- Category How it works note -->
               <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-800 text-xs text-slate-300 font-mono flex items-start space-x-2.5">
                 <i data-lucide="info" class="w-4 h-4 text-cyan-400 shrink-0 mt-0.5"></i>
-                <div><strong class="text-slate-100">Engineering Principle:</strong> {{ cat.howItWorks }}</div>
+                <div><strong class="text-slate-100">Engineering Behavior:</strong> {{ cat.howItWorks }}</div>
               </div>
 
               <!-- Component Cards Grid -->
@@ -298,11 +298,11 @@
                 <div v-for="part in cat.items" :key="part.name" class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3 flex flex-col justify-between shadow-sm">
                   
                   <div class="space-y-2">
-                    <!-- Image Mockup / Thumbnail -->
-                    <div class="h-28 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-950 relative group">
-                      <img :src="part.image" class="w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-80" alt="Component Preview">
-                      <div class="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-slate-950/80 backdrop-blur text-[10px] font-mono text-cyan-300 border border-slate-800">
-                        {{ part.avgCost }}
+                    <!-- Specific Component Image -->
+                    <div class="h-32 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-950 relative group">
+                      <img :src="part.image" class="w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90" alt="Specific Hardware Component">
+                      <div class="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-slate-950/90 backdrop-blur text-[10px] font-mono text-cyan-300 border border-slate-800">
+                        Market: {{ part.avgCost }}
                       </div>
                     </div>
 
@@ -313,7 +313,7 @@
                     <p class="text-xs text-slate-300 font-sans leading-relaxed">{{ part.description }}</p>
 
                     <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800/80 font-mono text-[11px] space-y-1 text-slate-400">
-                      <div><strong class="text-slate-200">Best For:</strong> {{ part.bestFor }}</div>
+                      <div><strong class="text-slate-200">Application:</strong> {{ part.bestFor }}</div>
                       <div><strong class="text-slate-200">Specs:</strong> {{ part.specs }}</div>
                     </div>
                   </div>
