@@ -10,8 +10,79 @@ createApp({
     const draggedProject = ref(null);
 
     // Sidebar Resizer state
-    const sidebarWidth = ref(256);
+    const sidebarWidth = ref(260);
     const isResizing = ref(false);
+
+    // Tutorial Chapters State & Sandbox
+    const tutorialStep = ref(0);
+    const demoCelebrationActive = ref(false);
+
+    const tutorialChapters = ref([
+      {
+        title: 'Projects & BOM Budgeting',
+        targetView: 'projects',
+        btnText: 'Projects Workspace',
+        description: 'Never lose track of what a hardware build costs. Create project cards, assign parts to your Bill of Materials (BOM) with inline editing, and monitor target budgets instantly.',
+        bulletPoints: [
+          'Inline editing for part names, quantities, and prices',
+          'Automated budget calculation vs user-defined limits',
+          'Professional shareable project report exports'
+        ]
+      },
+      {
+        title: 'Kanban Pipeline & Celebration',
+        targetView: 'kanban',
+        btnText: 'Kanban Pipeline',
+        description: 'Drag and drop your engineering roadmap across stages from Planning to Completed. Moving items into Completed triggers our signature success celebration pulse.',
+        bulletPoints: [
+          'Smooth drag-and-drop board telemetry',
+          'Strict state checks ensuring pulse fires only on completion',
+          'Quick stage selector dropdowns for fast organization'
+        ]
+      },
+      {
+        title: 'Parts Inventory Management',
+        targetView: 'inventory',
+        btnText: 'Parts Inventory',
+        description: 'Catalog all your loose microcontrollers, sensors, and passive components with designated storage bin locations so you never buy duplicates.',
+        bulletPoints: [
+          'Physical bin location tags (e.g., Box 1 - Microcontrollers)',
+          'Stock quantity tracking and management',
+          'Instant deletion and record updates'
+        ]
+      },
+      {
+        title: 'Web Serial USB Console',
+        targetView: 'serial',
+        btnText: 'Web Serial Console',
+        description: 'Connect microcontrollers (ESP32, Arduino, Teensy) directly over USB using the Web Serial API to stream live logs and debug firmware in your browser.',
+        bulletPoints: [
+          'Native browser USB device port selector',
+          'Live serial streaming monitor',
+          'Command input line to send serial payloads'
+        ]
+      }
+    ]);
+
+    const currentChapter = computed(() => tutorialChapters.value[tutorialStep.value]);
+
+    const nextTutorialStep = () => {
+      if (tutorialStep.value < tutorialChapters.value.length - 1) tutorialStep.value++;
+    };
+
+    const prevTutorialStep = () => {
+      if (tutorialStep.value > 0) tutorialStep.value--;
+    };
+
+    const jumpToView = (viewName) => {
+      currentView.value = viewName;
+      selectedProject.value = null;
+    };
+
+    const triggerDemoCelebration = () => {
+      demoCelebrationActive.value = true;
+      setTimeout(() => { demoCelebrationActive.value = false; }, 2500);
+    };
 
     // Web Serial state
     const serialConnected = ref(false);
@@ -60,7 +131,7 @@ createApp({
 
     const handleMouseMove = (e) => {
       if (!isResizing.value) return;
-      if (e.clientX >= 200 && e.clientX <= 450) {
+      if (e.clientX >= 220 && e.clientX <= 450) {
         sidebarWidth.value = e.clientX;
       }
     };
@@ -161,7 +232,7 @@ createApp({
 
       if (previousStage !== 'Completed' && newStage === 'Completed') {
         proj.justCompleted = true;
-        setTimeout(() => { proj.justCompleted = false; }, 2000);
+        setTimeout(() => { proj.justCompleted = false; }, 2500);
       }
     };
 
@@ -221,7 +292,7 @@ createApp({
 
     const exportData = () => {
       const backup = { projects: projects.value, inventory: inventory.value, shoppingList: shoppingList.value };
-      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -248,7 +319,7 @@ createApp({
     };
 
     onMounted(() => { lucide.createIcons(); });
-    watch([currentView, selectedProject], () => { setTimeout(() => lucide.createIcons(), 50); });
+    watch([currentView, selectedProject, tutorialStep], () => { setTimeout(() => lucide.createIcons(), 50); });
 
     return {
       currentView,
@@ -285,7 +356,15 @@ createApp({
       calculateProjectCost,
       onDragStart,
       onDrop,
-      onStageSelectChange
+      onStageSelectChange,
+      tutorialStep,
+      tutorialChapters,
+      currentChapter,
+      nextTutorialStep,
+      prevTutorialStep,
+      jumpToView,
+      demoCelebrationActive,
+      triggerDemoCelebration
     };
   }
 }).mount('#app');

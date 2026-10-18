@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MakerOS — Engineering Workspace</title>
+  <title>MakerOS — Engineering Studio</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -16,58 +16,58 @@
 <body class="h-full flex flex-col font-sans antialiased selection:bg-cyan-500/30 selection:text-cyan-200 overflow-hidden">
   <div id="app" class="flex h-screen overflow-hidden select-none">
     
-    <!-- Sidebar Navigation with Resizer -->
-    <aside :style="{ width: sidebarWidth + 'px' }" class="bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0 relative">
+    <!-- Sidebar Navigation -->
+    <aside :style="{ width: sidebarWidth + 'px' }" class="bg-slate-900/95 backdrop-blur border-r border-slate-800 flex flex-col justify-between shrink-0 relative">
       <div>
-        <div class="p-5 border-b border-slate-800 flex items-center space-x-3">
-          <div class="p-2 bg-cyan-500/10 text-cyan-400 rounded-lg border border-cyan-500/20 shrink-0">
+        <div class="p-5 border-b border-slate-800/80 flex items-center space-x-3">
+          <div class="p-2 bg-cyan-500/10 text-cyan-400 rounded-xl border border-cyan-500/30 shadow-inner shrink-0">
             <i data-lucide="cpu" class="w-5 h-5"></i>
           </div>
           <div class="overflow-hidden">
-            <h1 class="font-semibold text-slate-100 text-sm truncate">MakerOS</h1>
-            <p class="text-[11px] text-slate-400 truncate">Engineering Workspace</p>
+            <h1 class="font-bold text-slate-100 text-sm tracking-tight truncate">MakerOS</h1>
+            <p class="text-[11px] text-slate-400 font-mono tracking-wide">STUDIO v2.4</p>
           </div>
         </div>
 
-        <nav class="p-3 space-y-1">
+        <nav class="p-3 space-y-1.5 font-medium text-xs">
           <button @click="currentView = 'guide'; selectedProject = null" 
-                  :class="currentView === 'guide' ? 'bg-slate-800 text-cyan-400 font-medium' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'" 
-                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs transition">
-            <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i>
-            <span class="truncate">User Guide & Intro</span>
+                  :class="currentView === 'guide' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
+                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200">
+            <i data-lucide="sparkles" class="w-4 h-4 shrink-0"></i>
+            <span class="truncate">Interactive Masterclass</span>
           </button>
 
           <button @click="currentView = 'projects'; selectedProject = null" 
-                  :class="(currentView === 'projects' && !selectedProject) ? 'bg-slate-800 text-cyan-400 font-medium' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'" 
-                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs transition">
+                  :class="(currentView === 'projects' && !selectedProject) ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
+                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200">
             <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i>
             <span class="truncate">Projects Workspace</span>
           </button>
 
           <button @click="currentView = 'kanban'; selectedProject = null" 
-                  :class="currentView === 'kanban' ? 'bg-slate-800 text-cyan-400 font-medium' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'" 
-                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs transition">
+                  :class="currentView === 'kanban' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
+                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200">
             <i data-lucide="kanban" class="w-4 h-4 shrink-0"></i>
             <span class="truncate">Kanban Pipeline</span>
           </button>
 
           <button @click="currentView = 'inventory'; selectedProject = null" 
-                  :class="currentView === 'inventory' ? 'bg-slate-800 text-cyan-400 font-medium' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'" 
-                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs transition">
+                  :class="currentView === 'inventory' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
+                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200">
             <i data-lucide="boxes" class="w-4 h-4 shrink-0"></i>
             <span class="truncate">Parts Inventory</span>
           </button>
 
           <button @click="currentView = 'shopping'; selectedProject = null" 
-                  :class="currentView === 'shopping' ? 'bg-slate-800 text-cyan-400 font-medium' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'" 
-                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs transition">
+                  :class="currentView === 'shopping' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
+                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200">
             <i data-lucide="shopping-cart" class="w-4 h-4 shrink-0"></i>
-            <span class="truncate">Shopping & Wishlist</span>
+            <span class="truncate">Shopping Wishlist</span>
           </button>
 
           <button @click="currentView = 'serial'; selectedProject = null" 
-                  :class="currentView === 'serial' ? 'bg-slate-800 text-cyan-400 font-medium' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'" 
-                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs transition">
+                  :class="currentView === 'serial' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
+                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200">
             <i data-lucide="terminal" class="w-4 h-4 shrink-0"></i>
             <span class="truncate">Web Serial Console</span>
           </button>
@@ -75,14 +75,14 @@
       </div>
 
       <!-- Backup Controls -->
-      <div class="p-4 border-t border-slate-800 space-y-2">
+      <div class="p-4 border-t border-slate-800/80 space-y-2">
         <div class="flex items-center space-x-2">
-          <button @click="exportData" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium py-1.5 px-2 rounded border border-slate-700 flex items-center justify-center space-x-1 transition">
-            <i data-lucide="download" class="w-3 h-3"></i>
+          <button @click="exportData" class="flex-1 bg-slate-800/60 hover:bg-slate-800 text-slate-300 text-xs font-medium py-2 px-2 rounded-xl border border-slate-700/80 flex items-center justify-center space-x-1.5 transition">
+            <i data-lucide="download" class="w-3.5 h-3.5 text-cyan-400"></i>
             <span>Export</span>
           </button>
-          <label class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium py-1.5 px-2 rounded border border-slate-700 flex items-center justify-center space-x-1 cursor-pointer transition">
-            <i data-lucide="upload" class="w-3 h-3"></i>
+          <label class="flex-1 bg-slate-800/60 hover:bg-slate-800 text-slate-300 text-xs font-medium py-2 px-2 rounded-xl border border-slate-700/80 flex items-center justify-center space-x-1.5 cursor-pointer transition">
+            <i data-lucide="upload" class="w-3.5 h-3.5 text-cyan-400"></i>
             <span>Import</span>
             <input type="file" @change="importData" accept=".json" class="hidden">
           </label>
@@ -90,72 +90,160 @@
       </div>
 
       <!-- Sidebar Resizer Handle -->
-      <div @mousedown="startResize" class="absolute top-0 right-0 w-2 h-full cursor-col-resize hover:bg-cyan-500/55 transition z-30"></div>
+      <div @mousedown="startResize" class="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-cyan-500 transition-colors z-30"></div>
     </aside>
 
     <!-- Main Content Area -->
-    <main class="flex-1 overflow-y-auto p-8 bg-slate-950">
+    <main class="flex-1 overflow-y-auto p-10 bg-slate-950">
       
-      <!-- VIEW: USER GUIDE & INTRO -->
-      <section v-if="currentView === 'guide'" class="max-w-4xl mx-auto space-y-6">
-        <div class="border-b border-slate-800 pb-4">
-          <h2 class="text-xl font-semibold text-slate-100">Welcome to MakerOS</h2>
-          <p class="text-xs text-slate-400">A clean, streamlined workspace for hardware engineering and project management.</p>
+      <!-- VIEW: INTERACTIVE MASTERCLASS & TUTORIAL -->
+      <section v-if="currentView === 'guide'" class="max-w-4xl mx-auto space-y-8 animate-fade-in">
+        
+        <!-- Hero Header -->
+        <div class="relative bg-gradient-to-r from-cyan-950/40 via-slate-900 to-slate-900 border border-cyan-500/20 rounded-2xl p-8 space-y-4 shadow-2xl">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-semibold">
+            <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+            <span>Interactive Masterclass</span>
+          </div>
+          <h2 class="text-3xl font-bold tracking-tight text-slate-100">Stop losing track of your builds and bins.</h2>
+          <p class="text-sm text-slate-300 leading-relaxed max-w-2xl font-sans">
+            MakerOS is built by makers, for makers. Step through this interactive tour to see how you can manage complex BOM budgets, track hardware pipelines, and debug microcontrollers instantly.
+          </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2">
-            <div class="text-cyan-400 font-bold flex items-center space-x-2 text-sm">
-              <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-              <span>1. Projects Workspace</span>
+        <!-- Chapter Interactive Player -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-xl">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-4">
+            <div>
+              <span class="text-xs text-cyan-400 font-mono font-bold tracking-wider uppercase">Module 0{{ tutorialStep + 1 }} / 0{{ tutorialChapters.length }}</span>
+              <h3 class="text-lg font-bold text-slate-100 mt-0.5">{{ currentChapter.title }}</h3>
             </div>
-            <p class="text-slate-300 font-sans leading-relaxed">Create projects, manage Bill of Materials (BOM) with inline editing, track target budgets, and export professional shareable project reports.</p>
+            
+            <!-- Chapter Selector -->
+            <div class="flex items-center space-x-2 font-mono text-xs">
+              <span class="text-slate-400">Jump to:</span>
+              <select v-model="tutorialStep" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-cyan-300 font-medium focus:outline-none focus:border-cyan-500">
+                <option v-for="(chap, idx) in tutorialChapters" :key="idx" :value="idx">
+                  {{ idx + 1 }}. {{ chap.title }}
+                </option>
+              </select>
+            </div>
           </div>
 
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2">
-            <div class="text-cyan-400 font-bold flex items-center space-x-2 text-sm">
-              <i data-lucide="kanban" class="w-4 h-4"></i>
-              <span>2. Kanban Pipeline</span>
+          <!-- Content & Sandbox -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+            <div class="space-y-4">
+              <p class="text-sm text-slate-300 leading-relaxed font-sans">
+                {{ currentChapter.description }}
+              </p>
+              
+              <ul class="space-y-2 text-xs text-slate-300 font-mono">
+                <li v-for="(point, pIdx) in currentChapter.bulletPoints" :key="pIdx" class="flex items-center space-x-2">
+                  <i data-lucide="check-circle" class="w-4 h-4 text-cyan-400 shrink-0"></i>
+                  <span>{{ point }}</span>
+                </li>
+              </ul>
+
+              <div class="pt-2 flex items-center space-x-3">
+                <button @click="jumpToView(currentChapter.targetView)" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs flex items-center space-x-2 transition shadow-lg shadow-cyan-500/20">
+                  <span>Open {{ currentChapter.btnText }}</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+              </div>
             </div>
-            <p class="text-slate-300 font-sans leading-relaxed">Drag and drop build cards across stages. Moving an item into <strong>Completed</strong> triggers a celebratory success pulse.</p>
+
+            <!-- Interactive Sandbox Widget -->
+            <div class="bg-slate-950 border border-slate-800/80 rounded-2xl p-5 space-y-4 font-mono text-xs">
+              <div class="flex items-center justify-between text-slate-400 pb-2 border-b border-slate-900">
+                <span class="text-cyan-400 font-bold flex items-center space-x-1.5">
+                  <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
+                  <span>Live Sandbox Preview</span>
+                </span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 text-slate-400">Interactive</span>
+              </div>
+
+              <!-- Sandbox Case 1: Project Budget Simulation -->
+              <div v-if="tutorialStep === 0" class="space-y-3">
+                <div class="text-slate-300">Simulate adding BOM parts to a project budget:</div>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-2">
+                  <div class="flex justify-between text-slate-400">
+                    <span>ESP32-S3 Module ($6.50 x 1)</span>
+                    <span class="text-emerald-400">$6.50</span>
+                  </div>
+                  <div class="flex justify-between text-slate-400">
+                    <span>OLED Display ($4.00 x 2)</span>
+                    <span class="text-emerald-400">$8.00</span>
+                  </div>
+                  <div class="pt-2 border-t border-slate-800 flex justify-between font-bold text-slate-100">
+                    <span>Calculated Total:</span>
+                    <span class="text-emerald-400">$14.50 (Within $50 budget limit)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sandbox Case 2: Kanban Celebration Trigger -->
+              <div v-if="tutorialStep === 1" class="space-y-3 text-center py-2">
+                <p class="text-slate-300">Click below to test the strict completion pulse animation:</p>
+                <button @click="triggerDemoCelebration" class="mx-auto px-4 py-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 font-bold transition flex items-center justify-center space-x-2 w-full">
+                  <i data-lucide="sparkles" class="w-4 h-4"></i>
+                  <span>Simulate Project Completion</span>
+                </button>
+                <div v-if="demoCelebrationActive" class="p-3 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-celebration font-bold">
+                  🎉 Project successfully marked as Completed!
+                </div>
+              </div>
+
+              <!-- Sandbox Case 3: Inventory & Bin Management -->
+              <div v-if="tutorialStep === 2" class="space-y-2">
+                <div class="text-slate-300">Quick Inventory Status Check:</div>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+                  <span>Box 1 - Microcontrollers</span>
+                  <span class="text-cyan-400 font-bold">4 units in stock</span>
+                </div>
+              </div>
+
+              <!-- Sandbox Case 4: Web Serial USB Simulator -->
+              <div v-if="tutorialStep === 3" class="space-y-2">
+                <div class="text-slate-300">Simulated Serial Telemetry Stream:</div>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-[11px] text-cyan-300 space-y-1 font-mono">
+                  <div>[GPIO] Initializing I2C bus... OK</div>
+                  <div>[Sensor] INMP441 microphone ready.</div>
+                  <div>[System] Connected to USB serial port at 115200 baud.</div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2">
-            <div class="text-cyan-400 font-bold flex items-center space-x-2 text-sm">
-              <i data-lucide="boxes" class="w-4 h-4"></i>
-              <span>3. Inventory & Shopping</span>
-            </div>
-            <p class="text-slate-300 font-sans leading-relaxed">Keep track of loose components in physical storage bins and maintain a shopping wishlist for parts you need to order.</p>
-          </div>
-
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2">
-            <div class="text-cyan-400 font-bold flex items-center space-x-2 text-sm">
-              <i data-lucide="terminal" class="w-4 h-4"></i>
-              <span>4. Web Serial Console</span>
-            </div>
-            <p class="text-slate-300 font-sans leading-relaxed">Connect microcontrollers over USB directly in your browser to test firmware and view live serial debugging output.</p>
+          <!-- Chapter Navigation Buttons -->
+          <div class="flex items-center justify-between pt-4 border-t border-slate-800">
+            <button @click="prevTutorialStep" :disabled="tutorialStep === 0" class="px-4 py-2 rounded-xl border border-slate-800 bg-slate-950 text-xs text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800 transition">
+              Previous Module
+            </button>
+            <button @click="nextTutorialStep" :disabled="tutorialStep === tutorialChapters.length - 1" class="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition shadow-lg shadow-cyan-500/20">
+              Next Module
+            </button>
           </div>
         </div>
       </section>
 
       <!-- VIEW: PROJECTS DASHBOARD -->
-      <section v-if="currentView === 'projects' && !selectedProject" class="max-w-6xl mx-auto space-y-6">
+      <section v-if="currentView === 'projects' && !selectedProject" class="max-w-6xl mx-auto space-y-6 animate-fade-in">
         <div class="flex justify-between items-center border-b border-slate-800 pb-4">
           <div>
-            <h2 class="text-xl font-semibold text-slate-100">Projects</h2>
+            <h2 class="text-xl font-bold text-slate-100 tracking-tight">Projects Workspace</h2>
             <p class="text-xs text-slate-400">Track active engineering builds and cost budgets.</p>
           </div>
-          <button @click="showNewProjectModal = true" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium px-4 py-2 rounded-lg text-xs flex items-center space-x-2 transition">
+          <button @click="showNewProjectModal = true" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs flex items-center space-x-2 transition shadow-lg shadow-cyan-500/20">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span>New Project</span>
           </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           <div v-for="project in projects" :key="project.id" 
                @click="openProject(project)"
-               :class="project.justCompleted ? 'animate-celebration border-emerald-500/50' : 'border-slate-800'"
-               class="bg-slate-900 border rounded-xl p-5 hover:border-slate-700 cursor-pointer transition flex flex-col justify-between shadow-sm">
+               :class="project.justCompleted ? 'animate-celebration border-emerald-500/50' : 'border-slate-800 hover:border-slate-700'"
+               class="bg-slate-900 border rounded-2xl p-5 cursor-pointer transition-all duration-300 flex flex-col justify-between shadow-lg group">
             <div>
               <div class="flex items-center justify-between mb-3">
                 <span class="px-2.5 py-1 text-xs rounded-full font-medium" 
@@ -166,15 +254,15 @@
                       }">
                   {{ project.status }}
                 </span>
-                <span class="text-xs text-slate-400">{{ project.category }}</span>
+                <span class="text-xs text-slate-400 font-mono">{{ project.category }}</span>
               </div>
 
-              <h3 class="font-semibold text-slate-100 mb-2 text-base">{{ project.title }}</h3>
-              <p class="text-xs text-slate-400 line-clamp-2 mb-4 leading-relaxed">{{ project.description }}</p>
+              <h3 class="font-bold text-slate-100 mb-2 text-base group-hover:text-cyan-300 transition">{{ project.title }}</h3>
+              <p class="text-xs text-slate-400 line-clamp-2 mb-4 leading-relaxed font-sans">{{ project.description }}</p>
             </div>
             
-            <div class="pt-4 border-t border-slate-800 space-y-2">
-              <div class="flex justify-between items-center text-xs">
+            <div class="pt-4 border-t border-slate-800/80 space-y-2 font-mono text-xs">
+              <div class="flex justify-between items-center">
                 <span class="text-slate-400">Total Cost: <strong class="text-emerald-400">${{ calculateProjectCost(project) }}</strong></span>
                 <span v-if="project.targetBudget" class="text-slate-500">
                   / ${{ project.targetBudget }} target
@@ -186,9 +274,9 @@
       </section>
 
       <!-- VIEW: KANBAN PIPELINE -->
-      <section v-if="currentView === 'kanban'" class="max-w-6xl mx-auto space-y-6">
+      <section v-if="currentView === 'kanban'" class="max-w-6xl mx-auto space-y-6 animate-fade-in">
         <div class="border-b border-slate-800 pb-4">
-          <h2 class="text-xl font-semibold text-slate-100">Kanban Build Pipeline</h2>
+          <h2 class="text-xl font-bold text-slate-100 tracking-tight">Kanban Build Pipeline</h2>
           <p class="text-xs text-slate-400">Drag cards between stages or use the dropdown selectors.</p>
         </div>
 
@@ -196,10 +284,10 @@
           <div v-for="stage in ['Planning', 'Prototyping', 'Assembly', 'Completed']" :key="stage" 
                @dragover.prevent
                @drop="onDrop(stage)"
-               class="bg-slate-900/50 border border-slate-800 rounded-xl p-4 space-y-3 min-h-[420px]">
-            <div class="flex justify-between items-center text-xs font-semibold text-slate-300 pb-2 border-b border-slate-800">
+               class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 space-y-3 min-h-[450px]">
+            <div class="flex justify-between items-center text-xs font-bold text-slate-300 pb-2 border-b border-slate-800 font-mono">
               <span>{{ stage }}</span>
-              <span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-mono">{{ projects.filter(p => p.status === stage).length }}</span>
+              <span class="px-2 py-0.5 rounded-full bg-slate-800 text-cyan-400">{{ projects.filter(p => p.status === stage).length }}</span>
             </div>
 
             <div class="space-y-3">
@@ -207,18 +295,18 @@
                    draggable="true"
                    @dragstart="onDragStart(proj)"
                    :class="proj.justCompleted ? 'animate-celebration border-emerald-500/50 bg-slate-900' : 'bg-slate-900 border-slate-800'"
-                   class="border p-3.5 rounded-lg space-y-2 cursor-grab active:cursor-grabbing hover:border-cyan-500/50 transition shadow-sm">
+                   class="border p-4 rounded-xl space-y-2 cursor-grab active:cursor-grabbing hover:border-cyan-500/50 transition shadow-md">
                 
                 <div class="flex items-center justify-between">
-                  <div class="font-medium text-xs text-slate-100">{{ proj.title }}</div>
+                  <div class="font-bold text-xs text-slate-100">{{ proj.title }}</div>
                   <i data-lucide="grip-vertical" class="w-3.5 h-3.5 text-slate-600"></i>
                 </div>
 
                 <div class="text-xs text-slate-400 line-clamp-2 leading-relaxed">{{ proj.description }}</div>
 
-                <div class="flex justify-between items-center pt-2 text-xs text-slate-500 border-t border-slate-800">
+                <div class="flex justify-between items-center pt-2 text-xs text-slate-500 border-t border-slate-800 font-mono">
                   <span>{{ proj.category }}</span>
-                  <select :value="proj.status" @change="onStageSelectChange(proj, $event.target.value)" class="bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 text-slate-300 text-xs focus:outline-none">
+                  <select :value="proj.status" @change="onStageSelectChange(proj, $event.target.value)" class="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-slate-300 text-xs focus:outline-none">
                     <option>Planning</option>
                     <option>Prototyping</option>
                     <option>Assembly</option>
@@ -232,101 +320,101 @@
       </section>
 
       <!-- VIEW: PROJECT DETAILS -->
-      <section v-if="selectedProject" class="max-w-4xl mx-auto space-y-6">
+      <section v-if="selectedProject" class="max-w-4xl mx-auto space-y-6 animate-fade-in">
         <div class="flex justify-between items-center">
           <button @click="selectedProject = null" class="text-xs text-cyan-400 hover:underline flex items-center space-x-1 font-medium">
             <i data-lucide="arrow-left" class="w-4 h-4"></i>
             <span>Back to Projects</span>
           </button>
           <div class="flex items-center space-x-2">
-            <button @click="generateProjectReport(selectedProject)" class="bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/20 text-xs px-3 py-1.5 rounded-lg transition flex items-center space-x-1">
+            <button @click="generateProjectReport(selectedProject)" class="bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/20 text-xs px-3.5 py-2 rounded-xl transition flex items-center space-x-1.5 font-medium shadow-sm">
               <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
               <span>Export Report</span>
             </button>
-            <button @click="confirmDelete(selectedProject.id)" class="text-xs text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 px-3 py-1.5 rounded-lg transition">Delete</button>
+            <button @click="confirmDelete(selectedProject.id)" class="text-xs text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 px-3.5 py-2 rounded-xl transition font-medium">Delete</button>
           </div>
         </div>
 
-        <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
           <div class="flex justify-between items-start">
             <div>
-              <span class="px-2.5 py-1 text-xs rounded-full font-medium border bg-slate-800 text-cyan-400 border-slate-700">
+              <span class="px-3 py-1 text-xs rounded-full font-medium border bg-slate-800 text-cyan-400 border-slate-700">
                 {{ selectedProject.status }}
               </span>
-              <h2 class="text-2xl font-semibold text-slate-100 tracking-tight mt-2">{{ selectedProject.title }}</h2>
+              <h2 class="text-2xl font-bold text-slate-100 tracking-tight mt-3">{{ selectedProject.title }}</h2>
             </div>
-            <div class="text-right">
+            <div class="text-right font-mono">
               <span class="text-xs text-slate-400 block">Total Cost</span>
               <span class="text-xl font-bold text-emerald-400">${{ calculateProjectCost(selectedProject) }}</span>
             </div>
           </div>
 
-          <p class="text-slate-300 text-xs leading-relaxed bg-slate-950 p-4 rounded-lg border border-slate-800">{{ selectedProject.description }}</p>
+          <p class="text-slate-300 text-xs leading-relaxed bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono">{{ selectedProject.description }}</p>
         </div>
 
         <!-- BOM with Inline Editing -->
-        <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
           <div class="flex justify-between items-center">
             <div>
-              <h3 class="text-sm font-semibold text-slate-100">Bill of Materials (BOM)</h3>
+              <h3 class="text-sm font-bold text-slate-100">Bill of Materials (BOM)</h3>
               <p class="text-xs text-slate-400">Click any field directly in the table to edit part details.</p>
             </div>
-            <button @click="addPartToProject" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 transition">
+            <button @click="addPartToProject" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3.5 py-2 rounded-xl border border-slate-700 transition font-medium shadow-sm">
               + Add Line Item
             </button>
           </div>
 
-          <div v-if="selectedProject.bom.length === 0" class="text-xs text-slate-500 italic py-2">No components logged yet.</div>
-          <div v-else class="space-y-2">
-            <div v-for="(part, idx) in selectedProject.bom" :key="idx" class="flex items-center bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs space-x-3">
-              <input v-model="part.name" placeholder="Component Name" class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-cyan-500 focus:outline-none text-slate-200 flex-1 px-1 py-0.5">
+          <div v-if="selectedProject.bom.length === 0" class="text-xs text-slate-500 italic py-3">No components logged yet.</div>
+          <div v-else class="space-y-2.5 font-mono text-xs">
+            <div v-for="(part, idx) in selectedProject.bom" :key="idx" class="flex items-center bg-slate-950 p-3 rounded-xl border border-slate-800 space-x-3">
+              <input v-model="part.name" placeholder="Component Name" class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-cyan-500 focus:outline-none text-slate-200 flex-1 px-1 py-0.5 font-medium">
               
               <div class="flex items-center space-x-1 text-slate-400">
                 <span>Qty:</span>
                 <input v-model.number="part.qty" type="number" class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-cyan-500 focus:outline-none text-slate-200 px-1 py-0.5 w-12 text-center">
               </div>
 
-              <div class="flex items-center space-x-1 text-emerald-400 font-medium">
+              <div class="flex items-center space-x-1 text-emerald-400 font-bold">
                 <span>$</span>
                 <input v-model.number="part.price" type="number" step="0.01" class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-cyan-500 focus:outline-none text-emerald-400 px-1 py-0.5 w-16">
               </div>
 
-              <button @click="selectedProject.bom.splice(idx, 1)" class="text-slate-500 hover:text-rose-400 text-xs">Remove</button>
+              <button @click="selectedProject.bom.splice(idx, 1)" class="text-slate-500 hover:text-rose-400 transition text-xs font-sans">Remove</button>
             </div>
           </div>
         </div>
       </section>
 
       <!-- VIEW: HARDWARE INVENTORY -->
-      <section v-if="currentView === 'inventory'" class="max-w-5xl mx-auto space-y-6">
+      <section v-if="currentView === 'inventory'" class="max-w-5xl mx-auto space-y-6 animate-fade-in">
         <div class="flex justify-between items-center border-b border-slate-800 pb-4">
           <div>
-            <h2 class="text-xl font-semibold text-slate-100">Parts Inventory</h2>
+            <h2 class="text-xl font-bold text-slate-100 tracking-tight">Parts Inventory</h2>
             <p class="text-xs text-slate-400">Manage loose hardware and storage locations.</p>
           </div>
-          <button @click="showNewInventoryModal = true" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium px-4 py-2 rounded-lg text-xs flex items-center space-x-2 transition">
+          <button @click="showNewInventoryModal = true" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs flex items-center space-x-2 transition shadow-lg shadow-cyan-500/20">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span>Add Component</span>
           </button>
         </div>
 
-        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-          <table class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-950 text-slate-400 uppercase border-b border-slate-800">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl font-mono text-xs">
+          <table class="w-full text-left text-slate-300">
+            <thead class="bg-slate-950 text-slate-400 uppercase border-b border-slate-800 text-[11px]">
               <tr>
-                <th class="px-4 py-3">Part Name</th>
-                <th class="px-4 py-3">Stock Quantity</th>
-                <th class="px-4 py-3">Storage Bin</th>
-                <th class="px-4 py-3 text-right">Action</th>
+                <th class="px-5 py-3.5">Part Name</th>
+                <th class="px-5 py-3.5">Stock Quantity</th>
+                <th class="px-5 py-3.5">Storage Bin</th>
+                <th class="px-5 py-3.5 text-right">Action</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-800">
-              <tr v-for="item in inventory" :key="item.id" class="hover:bg-slate-800/40">
-                <td class="px-4 py-3 font-medium text-slate-100">{{ item.name }}</td>
-                <td class="px-4 py-3 text-cyan-400 font-semibold">{{ item.quantity }} pcs</td>
-                <td class="px-4 py-3 text-slate-400">{{ item.location || 'Workbench Bin' }}</td>
-                <td class="px-4 py-3 text-right">
-                  <button @click="deleteInventoryItem(item.id)" class="text-slate-500 hover:text-rose-400 transition">Delete</button>
+            <tbody class="divide-y divide-slate-800/80">
+              <tr v-for="item in inventory" :key="item.id" class="hover:bg-slate-800/30 transition">
+                <td class="px-5 py-4 font-bold text-slate-100">{{ item.name }}</td>
+                <td class="px-5 py-4 text-cyan-400 font-bold">{{ item.quantity }} pcs</td>
+                <td class="px-5 py-4 text-slate-400">{{ item.location || 'Workbench Bin' }}</td>
+                <td class="px-5 py-4 text-right">
+                  <button @click="deleteInventoryItem(item.id)" class="text-slate-500 hover:text-rose-400 transition font-sans">Delete</button>
                 </td>
               </tr>
             </tbody>
@@ -335,41 +423,41 @@
       </section>
 
       <!-- VIEW: SHOPPING & WISHLIST -->
-      <section v-if="currentView === 'shopping'" class="max-w-5xl mx-auto space-y-6">
+      <section v-if="currentView === 'shopping'" class="max-w-5xl mx-auto space-y-6 animate-fade-in">
         <div class="flex justify-between items-center border-b border-slate-800 pb-4">
           <div>
-            <h2 class="text-xl font-semibold text-slate-100">Shopping & Wishlist</h2>
+            <h2 class="text-xl font-bold text-slate-100 tracking-tight">Shopping & Wishlist</h2>
             <p class="text-xs text-slate-400">Track parts needed for future builds.</p>
           </div>
-          <button @click="showNewShoppingModal = true" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium px-4 py-2 rounded-lg text-xs flex items-center space-x-2 transition">
+          <button @click="showNewShoppingModal = true" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs flex items-center space-x-2 transition shadow-lg shadow-cyan-500/20">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span>Add Wishlist Item</span>
           </button>
         </div>
 
-        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-          <table class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-950 text-slate-400 uppercase border-b border-slate-800">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl font-mono text-xs">
+          <table class="w-full text-left text-slate-300">
+            <thead class="bg-slate-950 text-slate-400 uppercase border-b border-slate-800 text-[11px]">
               <tr>
-                <th class="px-4 py-3">Part Needed</th>
-                <th class="px-4 py-3">Est. Price</th>
-                <th class="px-4 py-3">Vendor Link</th>
-                <th class="px-4 py-3 text-right">Action</th>
+                <th class="px-5 py-3.5">Part Needed</th>
+                <th class="px-5 py-3.5">Est. Price</th>
+                <th class="px-5 py-3.5">Vendor Link</th>
+                <th class="px-5 py-3.5 text-right">Action</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-800">
-              <tr v-for="item in shoppingList" :key="item.id" class="hover:bg-slate-800/40">
-                <td class="px-4 py-3 font-medium text-slate-100">{{ item.name }}</td>
-                <td class="px-4 py-3 text-emerald-400 font-semibold">${{ item.price }}</td>
-                <td class="px-4 py-3">
-                  <a v-if="item.link" :href="item.link" target="_blank" class="text-cyan-400 hover:underline flex items-center space-x-1">
+            <tbody class="divide-y divide-slate-800/80">
+              <tr v-for="item in shoppingList" :key="item.id" class="hover:bg-slate-800/30 transition">
+                <td class="px-5 py-4 font-bold text-slate-100">{{ item.name }}</td>
+                <td class="px-5 py-4 text-emerald-400 font-bold">${{ item.price }}</td>
+                <td class="px-5 py-4">
+                  <a v-if="item.link" :href="item.link" target="_blank" class="text-cyan-400 hover:underline flex items-center space-x-1 font-sans">
                     <span>Store Link</span>
                     <i data-lucide="external-link" class="w-3 h-3"></i>
                   </a>
                   <span v-else class="text-slate-600">-</span>
                 </td>
-                <td class="px-4 py-3 text-right space-x-2">
-                  <button @click="moveToInventory(item)" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded hover:bg-emerald-500/20 transition font-medium">Mark Bought & Move</button>
+                <td class="px-5 py-4 text-right space-x-2 font-sans">
+                  <button @click="moveToInventory(item)" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-xl hover:bg-emerald-500/20 transition font-semibold">Mark Bought</button>
                   <button @click="deleteShoppingItem(item.id)" class="text-slate-500 hover:text-rose-400 transition">Delete</button>
                 </td>
               </tr>
@@ -379,31 +467,31 @@
       </section>
 
       <!-- VIEW: WEB SERIAL CONSOLE -->
-      <section v-if="currentView === 'serial'" class="max-w-4xl mx-auto space-y-6">
+      <section v-if="currentView === 'serial'" class="max-w-4xl mx-auto space-y-6 animate-fade-in">
         <div class="flex justify-between items-center border-b border-slate-800 pb-4">
           <div>
-            <h2 class="text-xl font-semibold text-slate-100">Web Serial Console</h2>
+            <h2 class="text-xl font-bold text-slate-100 tracking-tight">Web Serial Console</h2>
             <p class="text-xs text-slate-400">Connect and debug microcontrollers directly via USB.</p>
           </div>
           <div>
-            <button @click="connectSerial" v-if="!serialConnected" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium px-4 py-2 rounded-lg text-xs flex items-center space-x-2 transition">
+            <button @click="connectSerial" v-if="!serialConnected" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs flex items-center space-x-2 transition shadow-lg shadow-cyan-500/20">
               <i data-lucide="plug" class="w-4 h-4"></i>
               <span>Connect Device</span>
             </button>
-            <button @click="disconnectSerial" v-else class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-4 py-2 rounded-lg text-xs font-medium">
+            <button @click="disconnectSerial" v-else class="bg-rose-500/10 text-rose-400 border border-rose-500/30 px-4 py-2.5 rounded-xl text-xs font-semibold">
               Disconnect
             </button>
           </div>
         </div>
 
-        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 font-mono text-xs">
-          <div class="h-72 bg-slate-950 rounded-lg p-4 overflow-y-auto border border-slate-800 text-cyan-300 space-y-1">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 font-mono text-xs shadow-xl">
+          <div class="h-80 bg-slate-950 rounded-xl p-4 overflow-y-auto border border-slate-800 text-cyan-300 space-y-1">
             <div v-if="serialLogs.length === 0" class="text-slate-600 italic">No serial data received. Connect an Arduino or ESP32 via USB and click Connect Device...</div>
             <div v-for="(log, lIdx) in serialLogs" :key="lIdx">{{ log }}</div>
           </div>
           <div class="flex space-x-3">
-            <input v-model="serialInputText" @keyup.enter="sendSerialCommand" type="text" placeholder="Type command to send..." class="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none focus:border-cyan-500">
-            <button @click="sendSerialCommand" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg transition font-medium">Send</button>
+            <input v-model="serialInputText" @keyup.enter="sendSerialCommand" type="text" placeholder="Type command to send..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-100 focus:outline-none focus:border-cyan-500">
+            <button @click="sendSerialCommand" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-5 py-3 rounded-xl transition font-semibold">Send</button>
           </div>
         </div>
       </section>
@@ -411,50 +499,48 @@
     </main>
 
     <!-- MODALS -->
-    <div v-if="showNewProjectModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-6 space-y-4 text-xs shadow-xl">
-        <h3 class="font-semibold text-slate-100 text-sm">Create New Project</h3>
-        
-        <div class="space-y-3">
-          <input v-model="newProject.title" type="text" placeholder="Project Title" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none focus:border-cyan-500">
-          <input v-model="newProject.category" type="text" placeholder="Category (e.g. Robotics, IoT)" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none">
-          <input v-model.number="newProject.targetBudget" type="number" placeholder="Target Budget ($)" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none">
-          <textarea v-model="newProject.description" placeholder="Short description..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none h-20"></textarea>
+    <div v-if="showNewProjectModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl">
+        <h3 class="font-bold text-slate-100 text-sm">Create New Project</h3>
+        <div class="space-y-3 font-mono">
+          <input v-model="newProject.title" type="text" placeholder="Project Title" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-100 focus:outline-none focus:border-cyan-500">
+          <input v-model="newProject.category" type="text" placeholder="Category (e.g. Robotics, IoT)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-100 focus:outline-none focus:border-cyan-500">
+          <input v-model.number="newProject.targetBudget" type="number" placeholder="Target Budget ($)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-100 focus:outline-none focus:border-cyan-500">
+          <textarea v-model="newProject.description" placeholder="Short description..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-100 focus:outline-none focus:border-cyan-500 h-20 font-sans"></textarea>
         </div>
-
-        <div class="flex justify-end space-x-3 pt-2">
-          <button @click="showNewProjectModal = false" class="text-slate-400 hover:text-slate-200">Cancel</button>
-          <button @click="addProject" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium rounded-lg">Create</button>
+        <div class="flex justify-end space-x-3 pt-2 font-sans">
+          <button @click="showNewProjectModal = false" class="text-slate-400 hover:text-slate-200 font-medium">Cancel</button>
+          <button @click="addProject" class="px-4 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-cyan-500/20">Create</button>
         </div>
       </div>
     </div>
 
-    <div v-if="showNewInventoryModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-6 space-y-4 text-xs shadow-xl">
-        <h3 class="font-semibold text-slate-100 text-sm">Add Component to Inventory</h3>
-        <div class="space-y-3">
-          <input v-model="newInventoryItem.name" placeholder="Component Name" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none">
-          <input v-model.number="newInventoryItem.quantity" type="number" placeholder="Quantity Owned" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none">
-          <input v-model="newInventoryItem.location" placeholder="Storage Bin Location" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none">
+    <div v-if="showNewInventoryModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl">
+        <h3 class="font-bold text-slate-100 text-sm">Add Component to Inventory</h3>
+        <div class="space-y-3 font-mono">
+          <input v-model="newInventoryItem.name" placeholder="Component Name" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-100 focus:outline-none focus:border-cyan-500">
+          <input v-model.number="newInventoryItem.quantity" type="number" placeholder="Quantity Owned" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-100 focus:outline-none focus:border-cyan-500">
+          <input v-model="newInventoryItem.location" placeholder="Storage Bin Location" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-100 focus:outline-none focus:border-cyan-500">
         </div>
-        <div class="flex justify-end space-x-3 pt-2">
-          <button @click="showNewInventoryModal = false" class="text-slate-400 hover:text-slate-200">Cancel</button>
-          <button @click="addInventoryItem" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium rounded-lg">Save</button>
+        <div class="flex justify-end space-x-3 pt-2 font-sans">
+          <button @click="showNewInventoryModal = false" class="text-slate-400 hover:text-slate-200 font-medium">Cancel</button>
+          <button @click="addInventoryItem" class="px-4 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-cyan-500/20">Save</button>
         </div>
       </div>
     </div>
 
-    <div v-if="showNewShoppingModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-6 space-y-4 text-xs shadow-xl">
-        <h3 class="font-semibold text-slate-100 text-sm">Add Item to Wishlist</h3>
-        <div class="space-y-3">
-          <input v-model="newShoppingItem.name" placeholder="Part Needed" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none">
-          <input v-model="newShoppingItem.price" placeholder="Est. Price ($)" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none">
-          <input v-model="newShoppingItem.link" placeholder="Vendor Link URL" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:outline-none">
+    <div v-if="showNewShoppingModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl">
+        <h3 class="font-bold text-slate-100 text-sm">Add Item to Wishlist</h3>
+        <div class="space-y-3 font-mono">
+          <input v-model="newShoppingItem.name" placeholder="Part Needed" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-100 focus:outline-none focus:border-cyan-500">
+          <input v-model="newShoppingItem.price" placeholder="Est. Price ($)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-100 focus:outline-none focus:border-cyan-500">
+          <input v-model="newShoppingItem.link" placeholder="Vendor Link URL" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-100 focus:outline-none focus:border-cyan-500">
         </div>
-        <div class="flex justify-end space-x-3 pt-2">
-          <button @click="showNewShoppingModal = false" class="text-slate-400 hover:text-slate-200">Cancel</button>
-          <button @click="addShoppingItem" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium rounded-lg">Add</button>
+        <div class="flex justify-end space-x-3 pt-2 font-sans">
+          <button @click="showNewShoppingModal = false" class="text-slate-400 hover:text-slate-200 font-medium">Cancel</button>
+          <button @click="addShoppingItem" class="px-4 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-cyan-500/20">Add</button>
         </div>
       </div>
     </div>
