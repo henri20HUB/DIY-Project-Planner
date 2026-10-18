@@ -25,7 +25,7 @@
           </div>
           <div class="overflow-hidden">
             <h1 class="font-bold text-slate-100 text-sm tracking-tight truncate">MakerOS</h1>
-            <p class="text-[11px] text-slate-400 font-mono tracking-wide">STUDIO v2.6</p>
+            <p class="text-[11px] text-slate-400 font-mono tracking-wide">STUDIO v2.7</p>
           </div>
         </div>
 
@@ -88,6 +88,13 @@
               <span class="truncate">Interactive Masterclass</span>
             </button>
 
+            <button @click="currentView = 'lifecycle'; selectedProject = null" 
+                    :class="currentView === 'lifecycle' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
+                    class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200">
+              <i data-lucide="git-branch" class="w-4 h-4 shrink-0"></i>
+              <span class="truncate">DIY Lifecycle Course</span>
+            </button>
+
             <button @click="currentView = 'lexicon'; selectedProject = null" 
                     :class="currentView === 'lexicon' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
                     class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200">
@@ -121,7 +128,7 @@
     <!-- Main Content Area -->
     <main class="flex-1 overflow-y-auto p-10 bg-slate-950">
       
-      <!-- VIEW: INTERACTIVE MASTERCLASS & TUTORIAL -->
+      <!-- VIEW: INTERACTIVE MASTERCLASS & TUTORIAL (UPDATED) -->
       <section v-if="currentView === 'guide'" class="max-w-4xl mx-auto space-y-8 animate-fade-in">
         
         <!-- Hero Header -->
@@ -132,7 +139,7 @@
           </div>
           <h2 class="text-3xl font-bold tracking-tight text-slate-100">Stop losing track of your builds and bins.</h2>
           <p class="text-sm text-slate-300 leading-relaxed max-w-2xl font-sans">
-            MakerOS is built by makers, for makers. Step through this interactive tour to see how you can manage complex BOM budgets, track hardware pipelines, and debug microcontrollers instantly.
+            MakerOS is built by makers, for makers. Step through this interactive tour to see how you can manage complex BOM budgets, learn hardware development lifecycle phases, reference component specs, and debug microcontrollers directly.
           </p>
         </div>
 
@@ -187,7 +194,7 @@
                 <span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 text-slate-400">Interactive</span>
               </div>
 
-              <!-- Sandbox Case 1: Project Budget Simulation -->
+              <!-- Sandbox Module 0: Project Budget Simulation -->
               <div v-if="tutorialStep === 0" class="space-y-3">
                 <div class="text-slate-300">Simulate adding BOM parts to a project budget:</div>
                 <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-2">
@@ -206,7 +213,7 @@
                 </div>
               </div>
 
-              <!-- Sandbox Case 2: Kanban Celebration Trigger -->
+              <!-- Sandbox Module 1: Kanban Celebration Trigger -->
               <div v-if="tutorialStep === 1" class="space-y-3 text-center py-2">
                 <p class="text-slate-300">Click below to test the strict completion pulse animation:</p>
                 <button @click="triggerDemoCelebration" class="mx-auto px-4 py-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 font-bold transition flex items-center justify-center space-x-2 w-full">
@@ -218,7 +225,7 @@
                 </div>
               </div>
 
-              <!-- Sandbox Case 3: Inventory & Bin Management -->
+              <!-- Sandbox Module 2: Inventory & Bin Management -->
               <div v-if="tutorialStep === 2" class="space-y-2">
                 <div class="text-slate-300">Quick Inventory Status Check:</div>
                 <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
@@ -227,7 +234,7 @@
                 </div>
               </div>
 
-              <!-- Sandbox Case 4: Web Serial USB Simulator -->
+              <!-- Sandbox Module 3: Web Serial USB Simulator -->
               <div v-if="tutorialStep === 3" class="space-y-2">
                 <div class="text-slate-300">Simulated Serial Telemetry Stream:</div>
                 <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-[11px] text-cyan-300 space-y-1 font-mono">
@@ -236,6 +243,40 @@
                   <div>[System] Connected to USB serial port at 115200 baud.</div>
                 </div>
               </div>
+
+              <!-- Sandbox Module 4: Parts Directory & Wishlist Push -->
+              <div v-if="tutorialStep === 4" class="space-y-3">
+                <div class="text-slate-300">Parts Directory Lexicon Preview:</div>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-2">
+                  <div class="flex justify-between items-center">
+                    <span class="font-bold text-slate-200">ESP32-S3 DevKit</span>
+                    <span class="text-emerald-400">$6.50</span>
+                  </div>
+                  <button @click="jumpToView('lexicon')" class="w-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 py-1.5 rounded-lg text-[10px] font-bold hover:bg-cyan-500/20 transition">
+                    + Explore & Push to Wishlist
+                  </button>
+                </div>
+              </div>
+
+              <!-- Sandbox Module 5: DIY Project Lifecycle Progress -->
+              <div v-if="tutorialStep === 5" class="space-y-2">
+                <div class="text-slate-300">DIY Lifecycle Phase Checklist:</div>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-1.5 text-slate-400 text-[11px]">
+                  <div class="text-cyan-400 flex items-center space-x-1">
+                    <i data-lucide="check-circle" class="w-3 h-3"></i>
+                    <span>Phase 1: Ideation & Feasibility</span>
+                  </div>
+                  <div class="text-cyan-400 flex items-center space-x-1">
+                    <i data-lucide="check-circle" class="w-3 h-3"></i>
+                    <span>Phase 2: Architecture & Components</span>
+                  </div>
+                  <div class="text-slate-500 flex items-center space-x-1">
+                    <i data-lucide="circle" class="w-3 h-3"></i>
+                    <span>Phase 3: Breadboarding & Schematics</span>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -251,7 +292,61 @@
         </div>
       </section>
 
-      <!-- VIEW: PARTS DIRECTORY & LEXICON (SPECIFIC HARDWARE LEXICON) -->
+      <!-- VIEW: DIY PROJECT LIFECYCLE COURSE (NEW) -->
+      <section v-if="currentView === 'lifecycle'" class="max-w-5xl mx-auto space-y-6 animate-fade-in">
+        <div class="border-b border-slate-800 pb-4">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-semibold mb-2">
+            <i data-lucide="git-branch" class="w-3.5 h-3.5"></i>
+            <span>Beginner Roadmap</span>
+          </div>
+          <h2 class="text-xl font-bold text-slate-100 tracking-tight">DIY Hardware Project Lifecycle Course</h2>
+          <p class="text-xs text-slate-400">A step-by-step masterclass for taking any hardware build from an initial idea to a finished, reliable physical build — expecting zero prior engineering experience.</p>
+        </div>
+
+        <div class="space-y-4">
+          <div v-for="(phase, idx) in lifecyclePhases" :key="phase.id" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-lg">
+            <div class="flex items-start justify-between border-b border-slate-800/80 pb-3">
+              <div class="flex items-center space-x-3">
+                <span class="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center font-mono font-bold text-xs shrink-0">
+                  0{{ idx + 1 }}
+                </span>
+                <div>
+                  <h3 class="text-base font-bold text-slate-100">{{ phase.title }}</h3>
+                  <p class="text-xs text-slate-400 font-sans">{{ phase.subtitle }}</p>
+                </div>
+              </div>
+              <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-950 text-slate-400 border border-slate-800 uppercase">{{ phase.duration }}</span>
+            </div>
+
+            <p class="text-xs text-slate-300 font-sans leading-relaxed">{{ phase.description }}</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 font-mono text-xs">
+              <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 space-y-2">
+                <div class="text-cyan-400 font-bold flex items-center space-x-1.5">
+                  <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+                  <span>Key Action Items</span>
+                </div>
+                <ul class="space-y-1.5 text-slate-300 text-[11px]">
+                  <li v-for="(action, aIdx) in phase.actions" :key="aIdx" class="flex items-start space-x-2">
+                    <span class="text-cyan-500 font-bold">•</span>
+                    <span>{{ action }}</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 space-y-2">
+                <div class="text-amber-400 font-bold flex items-center space-x-1.5">
+                  <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                  <span>Pro-Tip & Common Mistakes</span>
+                </div>
+                <p class="text-slate-300 text-[11px] font-sans leading-relaxed">{{ phase.proTip }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: PARTS DIRECTORY & LEXICON -->
       <section v-if="currentView === 'lexicon'" class="max-w-5xl mx-auto space-y-6 animate-fade-in">
         <div class="border-b border-slate-800 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
           <div>

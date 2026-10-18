@@ -14,7 +14,7 @@ createApp({
     const sidebarWidth = ref(260);
     const isResizing = ref(false);
 
-    // Tutorial Chapters State & Sandbox
+    // Tutorial Chapters State & Sandbox (UPDATED with Lexicon & DIY Lifecycle)
     const tutorialStep = ref(0);
     const demoCelebrationActive = ref(false);
 
@@ -62,10 +62,114 @@ createApp({
           'Live serial streaming monitor',
           'Command input line to send serial payloads'
         ]
+      },
+      {
+        title: 'Parts Lexicon & Wishlist Integration',
+        targetView: 'lexicon',
+        btnText: 'Parts Lexicon',
+        description: 'Browse curated electronic component categories with working principle descriptions, real hardware photos, and one-click additions to your Wishlist.',
+        bulletPoints: [
+          'Collapsible categories for microcontrollers, motors, passives, and cables',
+          'Detailed specs, current limits, and recommended use cases',
+          'Direct "+ Add to Shopping Wishlist" push buttons'
+        ]
+      },
+      {
+        title: 'DIY Project Lifecycle Guide',
+        targetView: 'lifecycle',
+        btnText: 'Lifecycle Course',
+        description: 'A 6-phase beginner course walking through how to take a DIY hardware project from a blank page to a finished physical build with zero prior experience.',
+        bulletPoints: [
+          '6 structured phases: Ideation, Architecture, Breadboarding, Code, Assembly, Testing',
+          'Action item checklists and pro-tips for avoiding beginner mistakes',
+          'Breadboard-first prototyping guidelines'
+        ]
       }
     ]);
 
-    // Enhanced Specific Hardware Lexicon with rigorous real part imagery and smaller parts categories
+    // New DIY Project Lifecycle Mastercourse Content
+    const lifecyclePhases = ref([
+      {
+        id: 1,
+        title: 'Phase 1: Ideation & Feasibility Check',
+        subtitle: 'Defining the goal and verifying what is physically possible',
+        duration: '1-2 Days',
+        description: 'Before buying components, clearly define what problem your project solves and list the core inputs (sensors/buttons) and outputs (motors/displays) required.',
+        actions: [
+          'Write down a 2-sentence mission statement for the build.',
+          'Identify necessary inputs (e.g., button press, temperature sensor).',
+          'Identify necessary outputs (e.g., spinning a wheel, lighting an OLED screen).'
+        ],
+        proTip: 'Avoid "scope creep" on your first build. Keep your initial goal focused on a single function (e.g., turn on a fan when it gets warm).'
+      },
+      {
+        id: 2,
+        title: 'Phase 2: Architecture & Component Selection',
+        subtitle: 'Choosing the microcontroller, sensors, and power source',
+        duration: '2-3 Days',
+        description: 'Match your project requirements against microcontroller specifications. Pick components that run at compatible voltage levels (typically 3.3V or 5V).',
+        actions: [
+          'Select a primary microcontroller (e.g., ESP32 for Wi-Fi, Arduino Nano for basic 5V sensors).',
+          'Verify sensor communication protocols (I2C uses 2 pins, SPI uses 4 pins).',
+          'Calculate total current draw to select an appropriate power supply or battery.'
+        ],
+        proTip: 'Always buy 1 or 2 extra passive components (resistors, LEDs, jumpers). They are inexpensive and easy to damage by mistake.'
+      },
+      {
+        id: 3,
+        title: 'Phase 3: Breadboarding & Schematic Design',
+        subtitle: 'Solderless prototyping and wiring validation',
+        duration: '3-5 Days',
+        description: 'Plug your parts into a solderless breadboard to test electrical connections before committing to permanent soldering.',
+        actions: [
+          'Connect power and ground rails across your breadboard.',
+          'Wire your microcontroller to inputs and outputs using jumper cables.',
+          'Double-check polarity on electrolytic capacitors and LEDs before powering on.'
+        ],
+        proTip: 'Never plug or unplug components on a breadboard while power is connected. Always disconnect USB/power first!'
+      },
+      {
+        id: 4,
+        title: 'Phase 4: Code & Firmware Development',
+        subtitle: 'Writing logic and debugging via Serial output',
+        duration: '4-7 Days',
+        description: 'Write microcontroller code using MicroPython, Arduino C++, or CircuitPython. Test individual sensors one by one before combining them into a single script.',
+        actions: [
+          'Test example code for each sensor individually.',
+          'Print diagnostic telemetry to the Web Serial terminal for live debugging.',
+          'Combine input triggers and output logic into a main loop.'
+        ],
+        proTip: 'Use `Serial.println()` liberally to inspect variable values in real-time.'
+      },
+      {
+        id: 5,
+        title: 'Phase 5: Assembly & Mechanical Integration',
+        subtitle: 'Soldering, enclosures, and structural mounting',
+        duration: '3-5 Days',
+        description: 'Transfer your breadboard design onto a perf board or custom PCB, and secure components inside a 3D printed or custom acrylic enclosure.',
+        actions: [
+          'Solder permanent connections onto perf boards or custom PCBs.',
+          'Mount switches, ports, and displays onto your enclosure walls.',
+          'Secure internal wiring using heat-shrink tubing and zip ties.'
+        ],
+        proTip: 'Leave extra wire length inside enclosures to make maintenance and debugging easier.'
+      },
+      {
+        id: 6,
+        title: 'Phase 6: Testing, Refinement & Documentation',
+        subtitle: 'Stress testing, fixing edge cases, and logging notes',
+        duration: 'Ongoing',
+        description: 'Run your device continuously to verify stability, clean up your source code repository, and record a final BOM in MakerOS.',
+        actions: [
+          'Perform a 24-hour continuous power run test.',
+          'Log final component prices and bin locations into your MakerOS workspace.',
+          'Export a shareable project report for your records.'
+        ],
+        proTip: 'Store your working code and schematics in a version control repo (e.g., GitHub) for easy recovery.'
+      }
+    ]);
+
+    // Enhanced Specific Hardware Lexicon
     const lexiconSearch = ref('');
     const lexiconCategories = ref([
       {
@@ -102,7 +206,7 @@ createApp({
         icon: 'sliders',
         isOpen: false,
         overview: 'Essential foundational elements that do not source power but shape voltage, limit current, filter noise, and stabilize power rails.',
-        howItWorks: 'Resistors restrict current flow following Ohm’s law ($V=IR$). Capacitors temporarily store and discharge electrostatic energy to smooth voltage ripple.',
+        howItWorks: 'Resistors restrict current flow following Ohm’s law (V=IR). Capacitors temporarily store and discharge electrostatic energy to smooth voltage ripple.',
         items: [
           {
             name: 'Carbon Film Resistor Kit (1/4W, 10Ω - 1MΩ)',
@@ -552,6 +656,7 @@ createApp({
       onStageSelectChange,
       tutorialStep,
       tutorialChapters,
+      lifecyclePhases,
       lexiconCategories,
       lexiconSearch,
       filteredLexiconCategories,
