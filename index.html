@@ -29,48 +29,66 @@
           </div>
         </div>
 
-        <nav class="p-3 space-y-1.5 font-medium text-xs">
-          <button @click="currentView = 'guide'; selectedProject = null" 
-                  :class="currentView === 'guide' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
-                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200">
-            <i data-lucide="sparkles" class="w-4 h-4 shrink-0"></i>
-            <span class="truncate">Interactive Masterclass</span>
-          </button>
+        <nav class="p-3 space-y-4 font-medium text-xs">
+          
+          <!-- Category: Knowledge & Onboarding -->
+          <div class="space-y-1">
+            <div class="px-3 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">Knowledge</div>
+            <button @click="currentView = 'guide'; selectedProject = null" 
+                    :class="currentView === 'guide' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
+                    class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200">
+              <i data-lucide="sparkles" class="w-4 h-4 shrink-0"></i>
+              <span class="truncate">Interactive Masterclass</span>
+            </button>
+          </div>
 
-          <button @click="currentView = 'projects'; selectedProject = null" 
-                  :class="(currentView === 'projects' && !selectedProject) ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
-                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200">
-            <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i>
-            <span class="truncate">Projects Workspace</span>
-          </button>
+          <!-- Category: Engineering Management -->
+          <div class="space-y-1">
+            <div class="px-3 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">Management</div>
+            <button @click="currentView = 'projects'; selectedProject = null" 
+                    :class="(currentView === 'projects' && !selectedProject) ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
+                    class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200">
+              <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i>
+              <span class="truncate">Projects Workspace</span>
+            </button>
 
-          <button @click="currentView = 'kanban'; selectedProject = null" 
-                  :class="currentView === 'kanban' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
-                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200">
-            <i data-lucide="kanban" class="w-4 h-4 shrink-0"></i>
-            <span class="truncate">Kanban Pipeline</span>
-          </button>
+            <button @click="currentView = 'kanban'; selectedProject = null" 
+                    :class="currentView === 'kanban' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
+                    class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200">
+              <i data-lucide="kanban" class="w-4 h-4 shrink-0"></i>
+              <span class="truncate">Kanban Pipeline</span>
+            </button>
+          </div>
 
-          <button @click="currentView = 'inventory'; selectedProject = null" 
-                  :class="currentView === 'inventory' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
-                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200">
-            <i data-lucide="boxes" class="w-4 h-4 shrink-0"></i>
-            <span class="truncate">Parts Inventory</span>
-          </button>
+          <!-- Category: Parts & Supply -->
+          <div class="space-y-1">
+            <div class="px-3 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">Parts & Supply</div>
+            <button @click="currentView = 'inventory'; selectedProject = null" 
+                    :class="currentView === 'inventory' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
+                    class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200">
+              <i data-lucide="boxes" class="w-4 h-4 shrink-0"></i>
+              <span class="truncate">Parts Inventory</span>
+            </button>
 
-          <button @click="currentView = 'shopping'; selectedProject = null" 
-                  :class="currentView === 'shopping' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
-                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200">
-            <i data-lucide="shopping-cart" class="w-4 h-4 shrink-0"></i>
-            <span class="truncate">Shopping Wishlist</span>
-          </button>
+            <button @click="currentView = 'shopping'; selectedProject = null" 
+                    :class="currentView === 'shopping' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
+                    class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200">
+              <i data-lucide="shopping-cart" class="w-4 h-4 shrink-0"></i>
+              <span class="truncate">Shopping Wishlist</span>
+            </button>
+          </div>
 
-          <button @click="currentView = 'serial'; selectedProject = null" 
-                  :class="currentView === 'serial' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
-                  class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200">
-            <i data-lucide="terminal" class="w-4 h-4 shrink-0"></i>
-            <span class="truncate">Web Serial Console</span>
-          </button>
+          <!-- Category: Lab Utilities -->
+          <div class="space-y-1">
+            <div class="px-3 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">Lab Utilities</div>
+            <button @click="currentView = 'serial'; selectedProject = null" 
+                    :class="currentView === 'serial' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
+                    class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200">
+              <i data-lucide="terminal" class="w-4 h-4 shrink-0"></i>
+              <span class="truncate">Web Serial Console</span>
+            </button>
+          </div>
+
         </nav>
       </div>
 
