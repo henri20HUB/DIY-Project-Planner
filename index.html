@@ -25,7 +25,7 @@
           </div>
           <div class="overflow-hidden">
             <h1 class="font-bold text-slate-100 text-sm tracking-tight truncate">MakerOS</h1>
-            <p class="text-[11px] text-slate-400 font-mono tracking-wide">STUDIO v2.8</p>
+            <p class="text-[11px] text-slate-400 font-mono tracking-wide">STUDIO v2.9</p>
           </div>
         </div>
 
@@ -332,7 +332,7 @@
         </div>
       </section>
 
-      <!-- VIEW: PARTS DIRECTORY & LEXICON (TEXT-OPTIMIZED & MASSIVELY EXPANDED) -->
+      <!-- VIEW: PARTS DIRECTORY & LEXICON -->
       <section v-if="currentView === 'lexicon'" class="max-w-5xl mx-auto space-y-6 animate-fade-in">
         <div class="border-b border-slate-800 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
           <div>
@@ -509,7 +509,8 @@
               <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
               <span>Export Report</span>
             </button>
-            <button @click="confirmDelete(selectedProject.id)" class="text-xs text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 px-3.5 py-2 rounded-xl transition font-medium">Delete</button>
+            <!-- In-Page Personal Confirm Modal Trigger -->
+            <button @click="promptDeleteProject(selectedProject)" class="text-xs text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 px-3.5 py-2 rounded-xl transition font-medium">Delete Project</button>
           </div>
         </div>
 
@@ -599,7 +600,7 @@
         </div>
       </section>
 
-      <!-- VIEW: SHOPPING & WISHLIST WITH CURATED STORE DIRECTORY -->
+      <!-- VIEW: SHOPPING & WISHLIST -->
       <section v-if="currentView === 'shopping'" class="max-w-5xl mx-auto space-y-8 animate-fade-in">
         <div class="flex justify-between items-center border-b border-slate-800 pb-4">
           <div>
@@ -612,7 +613,6 @@
           </button>
         </div>
 
-        <!-- Curated Maker Store Links Directory -->
         <div class="space-y-3">
           <h3 class="text-sm font-bold text-slate-200 flex items-center space-x-2">
             <i data-lucide="external-link" class="w-4 h-4 text-cyan-400"></i>
@@ -645,7 +645,6 @@
           </div>
         </div>
 
-        <!-- Wishlist Table -->
         <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl font-mono text-xs">
           <table class="w-full text-left text-slate-300">
             <thead class="bg-slate-950 text-slate-400 uppercase border-b border-slate-800 text-[11px]">
@@ -711,6 +710,34 @@
       </section>
 
     </main>
+
+    <!-- CUSTOM IN-PAGE CONFIRMATION MODAL (PERSONALIZED DELETE MODAL) -->
+    <div v-if="projectToDelete" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+      <div class="bg-slate-900 border border-rose-500/30 rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl">
+        <div class="flex items-center space-x-3 text-rose-400">
+          <div class="p-2.5 bg-rose-500/10 rounded-xl border border-rose-500/20">
+            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-100 text-sm">Delete Project Workspace</h3>
+            <p class="text-[11px] text-slate-400 font-mono">Action cannot be undone</p>
+          </div>
+        </div>
+
+        <p class="text-slate-300 leading-relaxed font-sans">
+          Are you sure you want to permanently delete <strong class="text-rose-400 font-mono">"{{ projectToDelete.title }}"</strong>? All associated Bill of Materials line items and budget configurations will be lost.
+        </p>
+
+        <div class="flex justify-end space-x-3 pt-3 border-t border-slate-800/80 font-sans">
+          <button @click="projectToDelete = null" class="px-4 py-2.5 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium transition">
+            Cancel
+          </button>
+          <button @click="confirmDeleteProject" class="px-4 py-2.5 bg-rose-500 hover:bg-rose-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-rose-500/20 transition">
+            Confirm & Delete
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- MODALS -->
     <div v-if="showNewProjectModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">

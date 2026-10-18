@@ -7,6 +7,7 @@ createApp({
     const showNewProjectModal = ref(false);
     const showNewInventoryModal = ref(false);
     const showNewShoppingModal = ref(false);
+    const projectToDelete = ref(null); // Personalized deletion state
     const draggedProject = ref(null);
 
     const sidebarWidth = ref(260);
@@ -117,7 +118,6 @@ createApp({
       }
     ]);
 
-    // Massively Expanded Text-Optimized Parts Lexicon (No Images)
     const lexiconSearch = ref('');
     const lexiconCategories = ref([
       {
@@ -144,8 +144,7 @@ createApp({
         items: [
           { name: 'Carbon Film Resistor Kit (1/4W)', category: 'Passive', avgCost: '$7.00', description: 'Axial lead resistors for current limiting and pull-up/pull-down lines.', bestFor: 'LED current limiting & biasing transistors', specs: '5% Tolerance / 0.25W rating' },
           { name: 'Electrolytic Capacitor Assortment', category: 'Passive', avgCost: '$5.50', description: 'Polarized energy storage cells used across power rails to filter noise.', bestFor: 'Power supply filtering & decoupling', specs: '10uF to 470uF / Various voltages' },
-          { name: 'Ceramic Disc Capacitors (100nF)', category: 'Passive', avgCost: '$3.00', description: 'Non-polarized capacitors for bypassing high-frequency noise to ground.', bestFor: 'Placing near IC power pins', specs: '50V rating / 100nF (0.1uF)' },
-          { name: 'Power Inductors (100uH)', category: 'Passive', avgCost: '$4.00', description: 'Wire-wound coils storing energy in a magnetic field when current changes.', bestFor: 'Switching regulators & LC filters', specs: '1.2A saturation current' }
+          { name: 'Ceramic Disc Capacitors (100nF)', category: 'Passive', avgCost: '$3.00', description: 'Non-polarized capacitors for bypassing high-frequency noise to ground.', bestFor: 'Placing near IC power pins', specs: '50V rating / 100nF (0.1uF)' }
         ]
       },
       {
@@ -171,8 +170,7 @@ createApp({
         items: [
           { name: 'Dupont Jumper Wire Bundle (120 pcs)', category: 'Interconnect', avgCost: '$4.00', description: 'Flexible ribbon cables with pre-crimped pin headers for breadboards.', bestFor: 'Prototyping sensors & GPIO breakouts', specs: '20cm length / Male-Female-Male mixes' },
           { name: 'Silicone Hook-Up Wire Reel Kit (22 AWG)', category: 'Interconnect', avgCost: '$12.00', description: 'Flexible stranded tinned copper wire with high-temp silicone insulation.', bestFor: 'Permanent wiring & custom harnesses', specs: '6 vibrant colors / 30ft total' },
-          { name: 'USB-C Shielded Data/Power Cable', category: 'Cable', avgCost: '$6.00', description: 'Heavy-gauge shielded copper cable supporting high-speed serial and power.', bestFor: 'Flashing MCUs & serial debugging', specs: 'USB 2.0 high-speed data pairs' },
-          { name: 'JST-PH 2.0mm Connector Kit', category: 'Interconnect', avgCost: '$7.50', description: 'Secure latching wire-to-board connectors preventing loose vibrations.', bestFor: 'LiPo battery plugs & module wiring', specs: '2-pin to 5-pin housings with crimps' }
+          { name: 'USB-C Shielded Data/Power Cable', category: 'Cable', avgCost: '$6.00', description: 'Heavy-gauge shielded copper cable supporting high-speed serial and power.', bestFor: 'Flashing MCUs & serial debugging', specs: 'USB 2.0 high-speed data pairs' }
         ]
       },
       {
@@ -184,8 +182,7 @@ createApp({
         howItWorks: 'Breadboards use internal spring clips for solderless connections. Perf boards and PCBs use copper traces.',
         items: [
           { name: 'Solderless Breadboard (830 Tie Points)', category: 'Prototyping', avgCost: '$3.50', description: 'Reusable plastic block with internal spring clips and power rails.', bestFor: 'Initial circuit layout & testing', specs: '830 tie points / Adhesive backing' },
-          { name: 'Double-Sided Perf Board Assortment', category: 'PCB', avgCost: '$5.00', description: 'FR4 fiberglass boards with plated through-holes for permanent soldering.', bestFor: 'Transitioning breadboard projects to permanent builds', specs: '1.6mm thickness / 2.54mm grid' },
-          { name: 'Custom Aluminum PCB Heat Sink Plate', category: 'Thermal', avgCost: '$4.50', description: 'Thermal dissipation plate for high-power electronics and LED drivers.', bestFor: 'High-power MOSFETs and regulators', specs: 'Anodized finish / Pre-drilled' }
+          { name: 'Double-Sided Perf Board Assortment', category: 'PCB', avgCost: '$5.00', description: 'FR4 fiberglass boards with plated through-holes for permanent soldering.', bestFor: 'Transitioning breadboard projects to permanent builds', specs: '1.6mm thickness / 2.54mm grid' }
         ]
       },
       {
@@ -196,9 +193,8 @@ createApp({
         overview: 'Components responsible for generating, regulating, and storing electrical energy safely.',
         howItWorks: 'Linear or switching regulators step down higher voltages to stable 3.3V or 5V logic rails.',
         items: [
-          { name: 'AMS117 3.3V Voltage Regulator Module', category: 'Power', avgCost: '$1.00', description: 'Step-down voltage regulator converting 5V inputs down to stable 3.3V.', bestFor: 'Powering ESP32/ESP8266 modules', specs: '800mA max output current' },
-          { name: 'TP4056 LiPo Battery Charger Board', category: 'Power', avgCost: '$0.80', description: 'Single-cell lithium battery charging module with micro-USB or USB-C input.', bestFor: 'Rechargeable portable project builds', specs: '1A max charge current with protection' },
-          { name: '18650 Rechargeable Li-Ion Cell (3.7V)', category: 'Battery', avgCost: '$5.00', description: 'High-capacity cylindrical lithium-ion battery for portable power.', bestFor: 'Robotics and handheld electronics', specs: '3000mAh / 3.7V nominal' }
+          { name: 'AMS1117 3.3V Voltage Regulator Module', category: 'Power', avgCost: '$1.00', description: 'Step-down voltage regulator converting 5V inputs down to stable 3.3V.', bestFor: 'Powering ESP32/ESP8266 modules', specs: '800mA max output current' },
+          { name: 'TP4056 LiPo Battery Charger Board', category: 'Power', avgCost: '$0.80', description: 'Single-cell lithium battery charging module with micro-USB or USB-C input.', bestFor: 'Rechargeable portable project builds', specs: '1A max charge current with protection' }
         ]
       },
       {
@@ -210,8 +206,7 @@ createApp({
         howItWorks: 'Steppers move in discrete angular steps; servos use internal feedback circuits to hold precise angles.',
         items: [
           { name: 'NEMA 17 Stepper Motor', category: 'Actuator', avgCost: '$14.00', description: 'Hybrid bipolar stepper motor with high holding torque.', bestFor: '3D printers & CNC positioning stages', specs: '1.8° step angle / 1.2A rating' },
-          { name: 'SG90 Micro Servo (9g)', category: 'Actuator', avgCost: '$2.50', description: 'Compact rotary actuator controlled via PWM pulses.', bestFor: 'Robotic grippers & camera pan/tilt', specs: '1.8 kg/cm torque / 4.8V limit' },
-          { name: 'TT Geared DC Motor (Dual Shaft)', category: 'Actuator', avgCost: '$2.00', description: 'Inexpensive gear motor widely used in small robotics platforms.', bestFor: 'Two-wheel drive robot chassis', specs: '1:48 gear ratio / 3V-6V operating' }
+          { name: 'SG90 Micro Servo (9g)', category: 'Actuator', avgCost: '$2.50', description: 'Compact rotary actuator controlled via PWM pulses.', bestFor: 'Robotic grippers & camera pan/tilt', specs: '1.8 kg/cm torque / 4.8V limit' }
         ]
       },
       {
@@ -223,8 +218,7 @@ createApp({
         howItWorks: 'Sensing elements experience physical changes translated into digital data packets over I2C or SPI.',
         items: [
           { name: 'BME280 Environmental Sensor', category: 'Sensor', avgCost: '$5.00', description: 'Digital sensor measuring barometric pressure, temperature, and humidity.', bestFor: 'Weather stations & indoor monitors', specs: 'I2C/SPI / Low power consumption' },
-          { name: 'HC-SR04 Ultrasonic Distance Sensor', category: 'Sensor', avgCost: '$1.50', description: 'Sonar echolocation sensor calculating distance to solid obstacles.', bestFor: 'Obstacle-avoiding robots', specs: '2cm to 400cm range / 5V TTL' },
-          { name: 'MPU6050 6-Axis Accelerometer/Gyro', category: 'Sensor', avgCost: '$3.00', description: 'Motion tracking chip measuring acceleration and rotational velocity.', bestFor: 'Self-balancing robots & tilt sensing', specs: 'I2C interface / 16-bit ADC' }
+          { name: 'HC-SR04 Ultrasonic Distance Sensor', category: 'Sensor', avgCost: '$1.50', description: 'Sonar echolocation sensor calculating distance to solid obstacles.', bestFor: 'Obstacle-avoiding robots', specs: '2cm to 400cm range / 5V TTL' }
         ]
       }
     ]);
@@ -438,11 +432,18 @@ createApp({
       showNewProjectModal.value = false;
     };
 
-    const confirmDelete = (id) => {
-      if (confirm('Delete this project?')) {
-        projects.value = projects.value.filter(p => p.id !== id);
-        selectedProject.value = null;
-      }
+    // Personal Custom In-Page Delete Prompt Trigger
+    const promptDeleteProject = (project) => {
+      projectToDelete.value = project;
+    };
+
+    // Personalized Deletion Handler
+    const confirmDeleteProject = () => {
+      if (!projectToDelete.value) return;
+      const targetId = projectToDelete.value.id;
+      projects.value = projects.value.filter(p => p.id !== targetId);
+      selectedProject.value = null;
+      projectToDelete.value = null;
     };
 
     const addPartToProject = () => {
@@ -507,7 +508,7 @@ createApp({
     };
 
     onMounted(() => { lucide.createIcons(); });
-    watch([currentView, selectedProject, tutorialStep, lexiconCategories], () => { setTimeout(() => lucide.createIcons(), 50); }, { deep: true });
+    watch([currentView, selectedProject, tutorialStep, lexiconCategories, projectToDelete], () => { setTimeout(() => lucide.createIcons(), 50); }, { deep: true });
 
     return {
       currentView,
@@ -515,6 +516,7 @@ createApp({
       showNewProjectModal,
       showNewInventoryModal,
       showNewShoppingModal,
+      projectToDelete,
       projects,
       inventory,
       shoppingList,
@@ -532,7 +534,8 @@ createApp({
       generateProjectReport,
       openProject,
       addProject,
-      confirmDelete,
+      promptDeleteProject,
+      confirmDeleteProject,
       addPartToProject,
       addInventoryItem,
       deleteInventoryItem,
