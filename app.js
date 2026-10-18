@@ -65,44 +65,160 @@ createApp({
       }
     ]);
 
-    const lexiconParts = ref([
+    // Enhanced Parts Lexicon with Categories, Descriptions, How-it-works, and Images
+    const lexiconSearch = ref('');
+    const lexiconCategories = ref([
       {
-        id: 1,
-        name: 'ESP32-S3 Microcontroller',
-        category: 'Microcontrollers',
-        avgCost: '$4.50 - $7.00',
-        description: 'Dual-core 240MHz MCU with native Wi-Fi, Bluetooth 5 (LE), and vector instructions for lightweight neural networks.',
-        bestFor: 'IoT Devices, Smart Home, Edge AI, Audio Streaming',
-        specs: '240MHz / 512KB SRAM / USB-OTG / I2S & Camera Support'
+        id: 'mcu',
+        title: 'Microcomputers & Microcontrollers',
+        icon: 'cpu',
+        isOpen: true,
+        overview: 'The brain of your project. MCUs process logic, read sensors, and control actuators, while single-board computers run full Linux operating systems.',
+        howItWorks: 'Code is compiled and flashed onto flash memory. GPIO pins handle digital and analog signals, communicating via protocols like I2C, SPI, and UART.',
+        items: [
+          {
+            name: 'ESP32-S3 Module',
+            category: 'Microcontroller',
+            avgCost: '$5.50',
+            description: 'Powerful dual-core Xtensa MCU with integrated Wi-Fi and Bluetooth 5 LE.',
+            bestFor: 'IoT dashboards, wireless data logging, smart home devices.',
+            specs: '240MHz / 512KB SRAM / USB-OTG',
+            image: 'https://images.unsplash.com/photo-1603732551681-2e9146399c15?auto=format&fit=crop&w=400&q=80'
+          },
+          {
+            name: 'Raspberry Pi Pico W',
+            category: 'Microcontroller',
+            avgCost: '$6.00',
+            description: 'RP2040 dual-core ARM Cortex-M0+ processor with onboard wireless chip.',
+            bestFor: 'MicroPython scripting, USB device emulation, low-cost automation.',
+            specs: '133MHz / 264KB SRAM / PIO state machines',
+            image: 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=400&q=80'
+          },
+          {
+            name: 'Arduino Nano V3',
+            category: 'Microcontroller',
+            avgCost: '$4.00',
+            description: 'Classic ATmega328P compact board popular for breadboard prototyping.',
+            bestFor: 'Simple sensor nodes, beginner robotics, robust 5V logic projects.',
+            specs: '16MHz / 32KB Flash / 2KB SRAM / 5V Logic',
+            image: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=400&q=80'
+          }
+        ]
       },
       {
-        id: 2,
-        name: 'Raspberry Pi Pico W',
-        category: 'Microcontrollers',
-        avgCost: '$6.00',
-        description: 'RP2040 chip with dual ARM Cortex-M0+ cores and Infineon CYW43439 wireless chip.',
-        bestFor: 'Beginner Projects, MicroPython / C++ Learning, USB HID Devices',
-        specs: '133MHz / 264KB SRAM / Programmable I/O (PIO)'
+        id: 'motors',
+        title: 'Motors & Actuators',
+        icon: 'activity',
+        isOpen: false,
+        overview: 'Convert electrical energy into mechanical motion, enabling robots, CNC machines, and automated mechanisms to move physical objects.',
+        howItWorks: 'Steppers move in discrete angular steps for precision; servos use internal feedback loops to hold exact angles; DC motors spin continuously when powered.',
+        items: [
+          {
+            name: 'NEMA 17 Stepper Motor',
+            category: 'Stepper Motor',
+            avgCost: '$14.00',
+            description: 'Standard 4-wire bipolar stepper motor providing high holding torque at low speeds.',
+            bestFor: '3D printers, CNC routers, linear slides, precision positioning.',
+            specs: '1.8° Step Angle (200 steps/rev) / 1.5A per phase',
+            image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=400&q=80'
+          },
+          {
+            name: 'SG90 Micro Servo (9g)',
+            category: 'Servo Motor',
+            avgCost: '$2.50',
+            description: 'Lightweight rotational servo motor controlled via PWM pulses (typically 0 to 180 degrees).',
+            bestFor: 'RC steering, miniature robot grippers, camera pan/tilt mechanisms.',
+            specs: '1.8 kg/cm stall torque / 4.8V DC operating voltage',
+            image: 'https://images.unsplash.com/photo-1563770660941-20978e870e26?auto=format&fit=crop&w=400&q=80'
+          }
+        ]
       },
       {
-        id: 3,
-        name: 'NEMA 17 Stepper Motor',
-        category: 'Actuators & Motors',
-        avgCost: '$12.00 - $16.00',
-        description: 'Precision brushless motor that divides a full rotation into equal discrete steps.',
-        bestFor: '3D Printers, CNC Mills, Robotic Arms, Precision Linear Motion',
-        specs: '1.8° Step Angle / 200 Steps/Rev / Requires A4988/TMC2209 Driver'
+        id: 'sensors',
+        title: 'Sensors & Transducers',
+        icon: 'gauge',
+        isOpen: false,
+        overview: 'The eyes and ears of your electronics. Sensors detect environmental metrics like temperature, distance, motion, gas, and light.',
+        howItWorks: 'Physical changes (resistance, capacitance, optical interruption) are converted into analog voltage levels or digital packets sent over I2C/SPI.',
+        items: [
+          {
+            name: 'BME280 Environmental Sensor',
+            category: 'Sensor',
+            avgCost: '$5.00',
+            description: 'Precision digital sensor measuring temperature, barometric pressure, and relative humidity.',
+            bestFor: 'Weather stations, altimeters, indoor climate monitors.',
+            specs: 'I2C/SPI Interface / ±1°C Temp Accuracy / Ultra-low power',
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=400&q=80'
+          },
+          {
+            name: 'HC-SR04 Ultrasonic Distance Sensor',
+            category: 'Sensor',
+            avgCost: '$1.50',
+            description: 'Uses sonar echolocation to calculate distance to solid objects by measuring sound wave bounce time.',
+            bestFor: 'Obstacle-avoiding robots, fluid level monitoring, proximity alarms.',
+            specs: '2cm to 400cm range / 5V TTL / 15° measuring angle',
+            image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=400&q=80'
+          }
+        ]
       },
       {
-        id: 4,
-        name: 'SG90 Micro Servo (9g)',
-        category: 'Actuators & Motors',
-        avgCost: '$2.00',
-        description: 'Tiny positional motor capable of ~180 degree rotation via PWM signal pulses.',
-        bestFor: 'RC Planes, Robotic Grippers, Pan/Tilt Camera Mounts',
-        specs: '1.8 kg/cm Torque / 4.8V Operating Range / PWM Controlled'
+        id: 'displays',
+        title: 'Displays & Lighting (LEDs)',
+        icon: 'sun',
+        isOpen: false,
+        overview: 'Provide visual telemetry, debugging readouts, and aesthetic lighting effects for user interfaces.',
+        howItWorks: 'OLED panels light individual self-illuminating pixels without backlights; addressable LEDs (WS2812B) daisy-chain data signals to control RGB color per pixel.',
+        items: [
+          {
+            name: '1.3" I2C OLED Display (128x64)',
+            category: 'Display',
+            avgCost: '$4.50',
+            description: 'High-contrast monochrome organic LED screen communicating over 2-wire I2C.',
+            bestFor: 'Menu systems, real-time sensor graphs, portable device status screens.',
+            specs: 'SSD1306 Driver / White or Blue pixels / 3.3V-5V tolerant',
+            image: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=400&q=80'
+          },
+          {
+            name: 'WS2812B Addressable LED Strip (1m / 60 LEDs)',
+            category: 'Lighting',
+            avgCost: '$9.00',
+            description: 'Flexible silicone strip where every single LED has an embedded driver chip for custom color chases.',
+            bestFor: 'Ambient case lighting, status indicator rings, reactive visual art pieces.',
+            specs: '5V DC / 24-bit color control / Single data line protocol',
+            image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=400&q=80'
+          }
+        ]
       }
     ]);
+
+    const filteredLexiconCategories = computed(() => {
+      if (!lexiconSearch.value) return lexiconCategories.value;
+      const q = lexiconSearch.value.toLowerCase();
+      
+      // Return categories that match query or contain matching items
+      return lexiconCategories.value.map(cat => {
+        const matchingItems = cat.items.filter(item => 
+          item.name.toLowerCase().includes(q) || 
+          item.description.toLowerCase().includes(q) || 
+          item.bestFor.toLowerCase().includes(q)
+        );
+        return {
+          ...cat,
+          isOpen: matchingItems.length > 0 ? true : cat.isOpen,
+          items: matchingItems.length > 0 ? matchingItems : cat.items
+        };
+      }).filter(cat => cat.items.length > 0);
+    });
+
+    const addLexiconPartToShopping = (part) => {
+      shoppingList.value.push({
+        id: Date.now() + Math.random(),
+        name: part.name,
+        price: part.avgCost.replace('$', ''),
+        link: 'https://aliexpress.com'
+      });
+      alert(`Added "${part.name}" to your Shopping Wishlist!`);
+    };
 
     const currentChapter = computed(() => tutorialChapters.value[tutorialStep.value]);
 
@@ -359,7 +475,7 @@ createApp({
     };
 
     onMounted(() => { lucide.createIcons(); });
-    watch([currentView, selectedProject, tutorialStep], () => { setTimeout(() => lucide.createIcons(), 50); });
+    watch([currentView, selectedProject, tutorialStep, lexiconCategories], () => { setTimeout(() => lucide.createIcons(), 50); }, { deep: true });
 
     return {
       currentView,
@@ -399,7 +515,10 @@ createApp({
       onStageSelectChange,
       tutorialStep,
       tutorialChapters,
-      lexiconParts,
+      lexiconCategories,
+      lexiconSearch,
+      filteredLexiconCategories,
+      addLexiconPartToShopping,
       currentChapter,
       nextTutorialStep,
       prevTutorialStep,

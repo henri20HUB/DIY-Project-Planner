@@ -25,7 +25,7 @@
           </div>
           <div class="overflow-hidden">
             <h1 class="font-bold text-slate-100 text-sm tracking-tight truncate">MakerOS</h1>
-            <p class="text-[11px] text-slate-400 font-mono tracking-wide">STUDIO v2.4</p>
+            <p class="text-[11px] text-slate-400 font-mono tracking-wide">STUDIO v2.5</p>
           </div>
         </div>
 
@@ -251,29 +251,86 @@
         </div>
       </section>
 
-      <!-- VIEW: PARTS DIRECTORY & LEXICON (NEW) -->
+      <!-- VIEW: PARTS DIRECTORY & LEXICON (ENHANCED) -->
       <section v-if="currentView === 'lexicon'" class="max-w-5xl mx-auto space-y-6 animate-fade-in">
-        <div class="border-b border-slate-800 pb-4">
-          <h2 class="text-xl font-bold text-slate-100 tracking-tight">Parts Lexicon & Directory</h2>
-          <p class="text-xs text-slate-400">Hardware & software encyclopedia for common maker components.</p>
+        <div class="border-b border-slate-800 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
+          <div>
+            <h2 class="text-xl font-bold text-slate-100 tracking-tight">Parts Directory & Lexicon</h2>
+            <p class="text-xs text-slate-400">Comprehensive hardware & software encyclopedia. Click any section header to collapse or expand.</p>
+          </div>
+          <!-- Quick Filter Search -->
+          <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-3 top-3"></i>
+            <input v-model="lexiconSearch" type="text" placeholder="Filter components..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 font-mono">
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div v-for="part in lexiconParts" :key="part.id" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 shadow-lg">
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 uppercase font-bold">{{ part.category }}</span>
-                <h3 class="text-base font-bold text-slate-100 mt-1">{{ part.name }}</h3>
+        <!-- Collapsible Categories Container -->
+        <div class="space-y-4">
+          <div v-for="cat in filteredLexiconCategories" :key="cat.id" class="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden shadow-lg transition">
+            
+            <!-- Category Accordion Header -->
+            <button @click="cat.isOpen = !cat.isOpen" class="w-full p-5 flex items-center justify-between bg-slate-900 hover:bg-slate-850 transition text-left cursor-pointer">
+              <div class="space-y-1 pr-4">
+                <div class="flex items-center space-x-2">
+                  <i :data-lucide="cat.icon" class="w-4 h-4 text-cyan-400"></i>
+                  <h3 class="text-base font-bold text-slate-100">{{ cat.title }}</h3>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">{{ cat.items.length }} parts</span>
+                </div>
+                <p class="text-xs text-slate-400 font-sans leading-relaxed">{{ cat.overview }}</p>
               </div>
-              <span class="text-xs text-emerald-400 font-mono font-semibold">{{ part.avgCost }}</span>
+              <div class="p-2 rounded-xl bg-slate-800/80 text-slate-300 shrink-0">
+                <i :data-lucide="cat.isOpen ? 'chevron-up' : 'chevron-down'" class="w-4 h-4"></i>
+              </div>
+            </button>
+
+            <!-- Collapsible Body Content -->
+            <div v-if="cat.isOpen" class="p-5 border-t border-slate-800/80 bg-slate-950/50 space-y-4 animate-fade-in">
+              
+              <!-- Category How it works note -->
+              <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-800 text-xs text-slate-300 font-mono flex items-start space-x-2.5">
+                <i data-lucide="info" class="w-4 h-4 text-cyan-400 shrink-0 mt-0.5"></i>
+                <div><strong class="text-slate-100">Engineering Principle:</strong> {{ cat.howItWorks }}</div>
+              </div>
+
+              <!-- Component Cards Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div v-for="part in cat.items" :key="part.name" class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3 flex flex-col justify-between shadow-sm">
+                  
+                  <div class="space-y-2">
+                    <!-- Image Mockup / Thumbnail -->
+                    <div class="h-28 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-950 relative group">
+                      <img :src="part.image" class="w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-80" alt="Component Preview">
+                      <div class="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-slate-950/80 backdrop-blur text-[10px] font-mono text-cyan-300 border border-slate-800">
+                        {{ part.avgCost }}
+                      </div>
+                    </div>
+
+                    <div class="flex justify-between items-start">
+                      <h4 class="font-bold text-slate-100 text-sm">{{ part.name }}</h4>
+                    </div>
+
+                    <p class="text-xs text-slate-300 font-sans leading-relaxed">{{ part.description }}</p>
+
+                    <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800/80 font-mono text-[11px] space-y-1 text-slate-400">
+                      <div><strong class="text-slate-200">Best For:</strong> {{ part.bestFor }}</div>
+                      <div><strong class="text-slate-200">Specs:</strong> {{ part.specs }}</div>
+                    </div>
+                  </div>
+
+                  <!-- Action Button -->
+                  <div class="pt-3 border-t border-slate-800/80 flex justify-end">
+                    <button @click="addLexiconPartToShopping(part)" class="w-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs py-2 px-3 rounded-lg transition font-semibold flex items-center justify-center space-x-1.5 shadow-sm">
+                      <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i>
+                      <span>Add to Shopping Wishlist</span>
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+
             </div>
 
-            <p class="text-xs text-slate-300 font-sans leading-relaxed">{{ part.description }}</p>
-
-            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 font-mono text-xs space-y-1.5 text-slate-400">
-              <div><strong class="text-slate-200">Ideal For:</strong> {{ part.bestFor }}</div>
-              <div><strong class="text-slate-200">Key Specs:</strong> {{ part.specs }}</div>
-            </div>
           </div>
         </div>
       </section>
