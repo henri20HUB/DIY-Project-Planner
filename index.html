@@ -25,7 +25,7 @@
           </div>
           <div class="overflow-hidden">
             <h1 class="font-bold text-slate-100 text-sm tracking-tight truncate">MakerOS</h1>
-            <p class="text-[11px] text-slate-400 font-mono tracking-wide">STUDIO v2.7</p>
+            <p class="text-[11px] text-slate-400 font-mono tracking-wide">STUDIO v2.8</p>
           </div>
         </div>
 
@@ -63,7 +63,7 @@
                     :class="currentView === 'shopping' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'" 
                     class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200">
               <i data-lucide="shopping-cart" class="w-4 h-4 shrink-0"></i>
-              <span class="truncate">Shopping Wishlist</span>
+              <span class="truncate">Shopping Wishlist & Stores</span>
             </button>
           </div>
 
@@ -128,10 +128,8 @@
     <!-- Main Content Area -->
     <main class="flex-1 overflow-y-auto p-10 bg-slate-950">
       
-      <!-- VIEW: INTERACTIVE MASTERCLASS & TUTORIAL (UPDATED) -->
+      <!-- VIEW: INTERACTIVE MASTERCLASS & TUTORIAL -->
       <section v-if="currentView === 'guide'" class="max-w-4xl mx-auto space-y-8 animate-fade-in">
-        
-        <!-- Hero Header -->
         <div class="relative bg-gradient-to-r from-cyan-950/40 via-slate-900 to-slate-900 border border-cyan-500/20 rounded-2xl p-8 space-y-4 shadow-2xl">
           <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-semibold">
             <i data-lucide="zap" class="w-3.5 h-3.5"></i>
@@ -139,11 +137,10 @@
           </div>
           <h2 class="text-3xl font-bold tracking-tight text-slate-100">Stop losing track of your builds and bins.</h2>
           <p class="text-sm text-slate-300 leading-relaxed max-w-2xl font-sans">
-            MakerOS is built by makers, for makers. Step through this interactive tour to see how you can manage complex BOM budgets, learn hardware development lifecycle phases, reference component specs, and debug microcontrollers directly.
+            MakerOS is built by makers, for makers. Step through this tour to explore how you can manage BOM budgets, navigate a text-optimized parts lexicon, check reliable hardware sourcing links, and debug hardware via Web Serial.
           </p>
         </div>
 
-        <!-- Chapter Interactive Player -->
         <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-xl">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-4">
             <div>
@@ -151,7 +148,6 @@
               <h3 class="text-lg font-bold text-slate-100 mt-0.5">{{ currentChapter.title }}</h3>
             </div>
             
-            <!-- Chapter Selector -->
             <div class="flex items-center space-x-2 font-mono text-xs">
               <span class="text-slate-400">Jump to:</span>
               <select v-model="tutorialStep" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-cyan-300 font-medium focus:outline-none focus:border-cyan-500">
@@ -162,7 +158,6 @@
             </div>
           </div>
 
-          <!-- Content & Sandbox -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
             <div class="space-y-4">
               <p class="text-sm text-slate-300 leading-relaxed font-sans">
@@ -184,7 +179,6 @@
               </div>
             </div>
 
-            <!-- Interactive Sandbox Widget -->
             <div class="bg-slate-950 border border-slate-800/80 rounded-2xl p-5 space-y-4 font-mono text-xs">
               <div class="flex items-center justify-between text-slate-400 pb-2 border-b border-slate-900">
                 <span class="text-cyan-400 font-bold flex items-center space-x-1.5">
@@ -194,7 +188,6 @@
                 <span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 text-slate-400">Interactive</span>
               </div>
 
-              <!-- Sandbox Module 0: Project Budget Simulation -->
               <div v-if="tutorialStep === 0" class="space-y-3">
                 <div class="text-slate-300">Simulate adding BOM parts to a project budget:</div>
                 <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-2">
@@ -213,9 +206,8 @@
                 </div>
               </div>
 
-              <!-- Sandbox Module 1: Kanban Celebration Trigger -->
               <div v-if="tutorialStep === 1" class="space-y-3 text-center py-2">
-                <p class="text-slate-300">Click below to test the strict completion pulse animation:</p>
+                <p class="text-slate-300">Click below to test completion pulse animation:</p>
                 <button @click="triggerDemoCelebration" class="mx-auto px-4 py-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 font-bold transition flex items-center justify-center space-x-2 w-full">
                   <i data-lucide="sparkles" class="w-4 h-4"></i>
                   <span>Simulate Project Completion</span>
@@ -225,7 +217,6 @@
                 </div>
               </div>
 
-              <!-- Sandbox Module 2: Inventory & Bin Management -->
               <div v-if="tutorialStep === 2" class="space-y-2">
                 <div class="text-slate-300">Quick Inventory Status Check:</div>
                 <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
@@ -234,7 +225,6 @@
                 </div>
               </div>
 
-              <!-- Sandbox Module 3: Web Serial USB Simulator -->
               <div v-if="tutorialStep === 3" class="space-y-2">
                 <div class="text-slate-300">Simulated Serial Telemetry Stream:</div>
                 <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-[11px] text-cyan-300 space-y-1 font-mono">
@@ -244,21 +234,19 @@
                 </div>
               </div>
 
-              <!-- Sandbox Module 4: Parts Directory & Wishlist Push -->
               <div v-if="tutorialStep === 4" class="space-y-3">
-                <div class="text-slate-300">Parts Directory Lexicon Preview:</div>
+                <div class="text-slate-300">Parts Lexicon & Sourcing Preview:</div>
                 <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-2">
                   <div class="flex justify-between items-center">
-                    <span class="font-bold text-slate-200">ESP32-S3 DevKit</span>
-                    <span class="text-emerald-400">$6.50</span>
+                    <span class="font-bold text-slate-200">10kΩ Resistor Pack</span>
+                    <span class="text-emerald-400">$3.00</span>
                   </div>
                   <button @click="jumpToView('lexicon')" class="w-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 py-1.5 rounded-lg text-[10px] font-bold hover:bg-cyan-500/20 transition">
-                    + Explore & Push to Wishlist
+                    + Explore Expanded Parts Directory
                   </button>
                 </div>
               </div>
 
-              <!-- Sandbox Module 5: DIY Project Lifecycle Progress -->
               <div v-if="tutorialStep === 5" class="space-y-2">
                 <div class="text-slate-300">DIY Lifecycle Phase Checklist:</div>
                 <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-1.5 text-slate-400 text-[11px]">
@@ -276,11 +264,9 @@
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
 
-          <!-- Chapter Navigation Buttons -->
           <div class="flex items-center justify-between pt-4 border-t border-slate-800">
             <button @click="prevTutorialStep" :disabled="tutorialStep === 0" class="px-4 py-2 rounded-xl border border-slate-800 bg-slate-950 text-xs text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800 transition">
               Previous Module
@@ -292,7 +278,7 @@
         </div>
       </section>
 
-      <!-- VIEW: DIY PROJECT LIFECYCLE COURSE (NEW) -->
+      <!-- VIEW: DIY PROJECT LIFECYCLE COURSE -->
       <section v-if="currentView === 'lifecycle'" class="max-w-5xl mx-auto space-y-6 animate-fade-in">
         <div class="border-b border-slate-800 pb-4">
           <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-semibold mb-2">
@@ -346,31 +332,28 @@
         </div>
       </section>
 
-      <!-- VIEW: PARTS DIRECTORY & LEXICON -->
+      <!-- VIEW: PARTS DIRECTORY & LEXICON (TEXT-OPTIMIZED & MASSIVELY EXPANDED) -->
       <section v-if="currentView === 'lexicon'" class="max-w-5xl mx-auto space-y-6 animate-fade-in">
         <div class="border-b border-slate-800 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
           <div>
             <h2 class="text-xl font-bold text-slate-100 tracking-tight">Parts Directory & Lexicon</h2>
-            <p class="text-xs text-slate-400">Strict component specs, behavior principles, and direct wishlist tools for your engineering bench.</p>
+            <p class="text-xs text-slate-400">Massive text-optimized technical encyclopedia covering microcontrollers, passives, semiconductors, modules, and wiring.</p>
           </div>
-          <!-- Quick Filter Search -->
           <div class="relative w-full sm:w-64">
             <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-3 top-3"></i>
-            <input v-model="lexiconSearch" type="text" placeholder="Search resistors, MCUs, buses..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 font-mono">
+            <input v-model="lexiconSearch" type="text" placeholder="Search resistors, MOSFETs, sensors..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 font-mono">
           </div>
         </div>
 
-        <!-- Collapsible Categories Container -->
         <div class="space-y-4">
           <div v-for="cat in filteredLexiconCategories" :key="cat.id" class="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden shadow-lg transition">
             
-            <!-- Category Accordion Header -->
             <button @click="cat.isOpen = !cat.isOpen" class="w-full p-5 flex items-center justify-between bg-slate-900 hover:bg-slate-850 transition text-left cursor-pointer">
               <div class="space-y-1 pr-4">
                 <div class="flex items-center space-x-2">
                   <i :data-lucide="cat.icon" class="w-4 h-4 text-cyan-400"></i>
                   <h3 class="text-base font-bold text-slate-100">{{ cat.title }}</h3>
-                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">{{ cat.items.length }} entries</span>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">{{ cat.items.length }} components</span>
                 </div>
                 <p class="text-xs text-slate-400 font-sans leading-relaxed">{{ cat.overview }}</p>
               </div>
@@ -379,30 +362,22 @@
               </div>
             </button>
 
-            <!-- Collapsible Body Content -->
             <div v-if="cat.isOpen" class="p-5 border-t border-slate-800/80 bg-slate-950/50 space-y-4 animate-fade-in">
               
-              <!-- Category How it works note -->
               <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-800 text-xs text-slate-300 font-mono flex items-start space-x-2.5">
                 <i data-lucide="info" class="w-4 h-4 text-cyan-400 shrink-0 mt-0.5"></i>
                 <div><strong class="text-slate-100">Engineering Behavior:</strong> {{ cat.howItWorks }}</div>
               </div>
 
-              <!-- Component Cards Grid -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div v-for="part in cat.items" :key="part.name" class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3 flex flex-col justify-between shadow-sm">
                   
                   <div class="space-y-2">
-                    <!-- Specific Component Image -->
-                    <div class="h-32 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-950 relative group">
-                      <img :src="part.image" class="w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90" alt="Specific Hardware Component">
-                      <div class="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-slate-950/90 backdrop-blur text-[10px] font-mono text-cyan-300 border border-slate-800">
-                        Market: {{ part.avgCost }}
-                      </div>
-                    </div>
-
                     <div class="flex justify-between items-start">
                       <h4 class="font-bold text-slate-100 text-sm">{{ part.name }}</h4>
+                      <span class="px-2 py-0.5 rounded bg-slate-950 text-[10px] font-mono text-cyan-300 border border-slate-800">
+                        {{ part.avgCost }}
+                      </span>
                     </div>
 
                     <p class="text-xs text-slate-300 font-sans leading-relaxed">{{ part.description }}</p>
@@ -413,7 +388,6 @@
                     </div>
                   </div>
 
-                  <!-- Action Button -->
                   <div class="pt-3 border-t border-slate-800/80 flex justify-end">
                     <button @click="addLexiconPartToShopping(part)" class="w-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs py-2 px-3 rounded-lg transition font-semibold flex items-center justify-center space-x-1.5 shadow-sm">
                       <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i>
@@ -556,7 +530,6 @@
           <p class="text-slate-300 text-xs leading-relaxed bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono">{{ selectedProject.description }}</p>
         </div>
 
-        <!-- BOM with Inline Editing -->
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
           <div class="flex justify-between items-center">
             <div>
@@ -626,12 +599,12 @@
         </div>
       </section>
 
-      <!-- VIEW: SHOPPING & WISHLIST -->
-      <section v-if="currentView === 'shopping'" class="max-w-5xl mx-auto space-y-6 animate-fade-in">
+      <!-- VIEW: SHOPPING & WISHLIST WITH CURATED STORE DIRECTORY -->
+      <section v-if="currentView === 'shopping'" class="max-w-5xl mx-auto space-y-8 animate-fade-in">
         <div class="flex justify-between items-center border-b border-slate-800 pb-4">
           <div>
-            <h2 class="text-xl font-bold text-slate-100 tracking-tight">Shopping & Wishlist</h2>
-            <p class="text-xs text-slate-400">Track parts needed for future builds.</p>
+            <h2 class="text-xl font-bold text-slate-100 tracking-tight">Shopping Wishlist & Sourcing Directory</h2>
+            <p class="text-xs text-slate-400">Track items needed for future builds and find trusted online electronics vendors.</p>
           </div>
           <button @click="showNewShoppingModal = true" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs flex items-center space-x-2 transition shadow-lg shadow-cyan-500/20">
             <i data-lucide="plus" class="w-4 h-4"></i>
@@ -639,6 +612,40 @@
           </button>
         </div>
 
+        <!-- Curated Maker Store Links Directory -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-bold text-slate-200 flex items-center space-x-2">
+            <i data-lucide="external-link" class="w-4 h-4 text-cyan-400"></i>
+            <span>Recommended Hardware Stores & Component Distributors</span>
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
+            <a href="https://www.adafruit.com" target="_blank" class="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-4 rounded-xl space-y-1.5 transition block shadow-sm group">
+              <div class="font-bold text-slate-100 group-hover:text-cyan-300 flex items-center justify-between">
+                <span>Adafruit Industries</span>
+                <i data-lucide="external-link" class="w-3 h-3 text-slate-500"></i>
+              </div>
+              <p class="text-[11px] text-slate-400 font-sans">Great for sensor breakout boards, beginner tutorials, LEDs, and open-source hardware.</p>
+            </a>
+
+            <a href="https://www.sparkfun.com" target="_blank" class="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-4 rounded-xl space-y-1.5 transition block shadow-sm group">
+              <div class="font-bold text-slate-100 group-hover:text-cyan-300 flex items-center justify-between">
+                <span>SparkFun Electronics</span>
+                <i data-lucide="external-link" class="w-3 h-3 text-slate-500"></i>
+              </div>
+              <p class="text-[11px] text-slate-400 font-sans">Extensive hobbyist inventory, development boards, and hardware prototyping kits.</p>
+            </a>
+
+            <a href="https://www.digikey.com" target="_blank" class="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-4 rounded-xl space-y-1.5 transition block shadow-sm group">
+              <div class="font-bold text-slate-100 group-hover:text-cyan-300 flex items-center justify-between">
+                <span>DigiKey / Mouser</span>
+                <i data-lucide="external-link" class="w-3 h-3 text-slate-500"></i>
+              </div>
+              <p class="text-[11px] text-slate-400 font-sans">Massive wholesale catalogs for precise discrete parts, ICs, resistors, and capacitors.</p>
+            </a>
+          </div>
+        </div>
+
+        <!-- Wishlist Table -->
         <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl font-mono text-xs">
           <table class="w-full text-left text-slate-300">
             <thead class="bg-slate-950 text-slate-400 uppercase border-b border-slate-800 text-[11px]">
@@ -650,6 +657,9 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-800/80">
+              <tr v-if="shoppingList.length === 0">
+                <td colspan="4" class="px-5 py-6 text-center text-slate-500 italic font-sans">Your shopping list is empty. Add items from the Parts Directory or manually.</td>
+              </tr>
               <tr v-for="item in shoppingList" :key="item.id" class="hover:bg-slate-800/30 transition">
                 <td class="px-5 py-4 font-bold text-slate-100">{{ item.name }}</td>
                 <td class="px-5 py-4 text-emerald-400 font-bold">${{ item.price }}</td>

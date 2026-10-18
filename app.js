@@ -2,7 +2,6 @@ const { createApp, ref, computed, onMounted, watch } = Vue;
 
 createApp({
   setup() {
-    // Defaults to Interactive Masterclass ('guide') when visiting for the first time
     const currentView = ref('guide');
     const selectedProject = ref(null);
     const showNewProjectModal = ref(false);
@@ -10,11 +9,9 @@ createApp({
     const showNewShoppingModal = ref(false);
     const draggedProject = ref(null);
 
-    // Sidebar Resizer state
     const sidebarWidth = ref(260);
     const isResizing = ref(false);
 
-    // Tutorial Chapters State & Sandbox (UPDATED with Lexicon & DIY Lifecycle)
     const tutorialStep = ref(0);
     const demoCelebrationActive = ref(false);
 
@@ -23,209 +20,145 @@ createApp({
         title: 'Projects & BOM Budgeting',
         targetView: 'projects',
         btnText: 'Projects Workspace',
-        description: 'Never lose track of what a hardware build costs. Create project cards, assign parts to your Bill of Materials (BOM) with inline editing, and monitor target budgets instantly.',
-        bulletPoints: [
-          'Inline editing for part names, quantities, and prices',
-          'Automated budget calculation vs user-defined limits',
-          'Professional shareable project report exports'
-        ]
+        description: 'Track build costs with project cards, BOM line items, and real-time budget calculations.',
+        bulletPoints: ['Inline editing', 'Automated budget tracking', 'Report exports']
       },
       {
         title: 'Kanban Pipeline & Celebration',
         targetView: 'kanban',
         btnText: 'Kanban Pipeline',
-        description: 'Drag and drop your engineering roadmap across stages from Planning to Completed. Moving items into Completed triggers our signature success celebration pulse.',
-        bulletPoints: [
-          'Smooth drag-and-drop board telemetry',
-          'Strict state checks ensuring pulse fires only on completion',
-          'Quick stage selector dropdowns for fast organization'
-        ]
+        description: 'Drag and drop your engineering roadmap across build stages from Planning to Completed.',
+        bulletPoints: ['Smooth drag-and-drop board', 'Completion celebration pulse', 'Quick dropdown selectors']
       },
       {
         title: 'Parts Inventory Management',
         targetView: 'inventory',
         btnText: 'Parts Inventory',
-        description: 'Catalog all your loose microcontrollers, sensors, and passive components with designated storage bin locations so you never buy duplicates.',
-        bulletPoints: [
-          'Physical bin location tags (e.g., Box 1 - Microcontrollers)',
-          'Stock quantity tracking and management',
-          'Instant deletion and record updates'
-        ]
+        description: 'Catalog loose hardware and storage locations so you never repurchase existing items.',
+        bulletPoints: ['Storage bin tags', 'Stock quantity management', 'Instant record updates']
       },
       {
         title: 'Web Serial USB Console',
         targetView: 'serial',
         btnText: 'Web Serial Console',
-        description: 'Connect microcontrollers (ESP32, Arduino, Teensy) directly over USB using the Web Serial API to stream live logs and debug firmware in your browser.',
-        bulletPoints: [
-          'Native browser USB device port selector',
-          'Live serial streaming monitor',
-          'Command input line to send serial payloads'
-        ]
+        description: 'Connect microcontrollers directly over USB via the Web Serial API to view logs.',
+        bulletPoints: ['Native browser USB port selector', 'Live telemetry monitor', 'Command line input']
       },
       {
-        title: 'Parts Lexicon & Wishlist Integration',
+        title: 'Parts Lexicon & Sourcing Directory',
         targetView: 'lexicon',
         btnText: 'Parts Lexicon',
-        description: 'Browse curated electronic component categories with working principle descriptions, real hardware photos, and one-click additions to your Wishlist.',
-        bulletPoints: [
-          'Collapsible categories for microcontrollers, motors, passives, and cables',
-          'Detailed specs, current limits, and recommended use cases',
-          'Direct "+ Add to Shopping Wishlist" push buttons'
-        ]
+        description: 'Browse text-optimized component categories and push parts directly to your shopping wishlist.',
+        bulletPoints: ['Massive component catalog', 'Working principles & specs', 'Direct wishlist integration']
       },
       {
         title: 'DIY Project Lifecycle Guide',
         targetView: 'lifecycle',
         btnText: 'Lifecycle Course',
-        description: 'A 6-phase beginner course walking through how to take a DIY hardware project from a blank page to a finished physical build with zero prior experience.',
-        bulletPoints: [
-          '6 structured phases: Ideation, Architecture, Breadboarding, Code, Assembly, Testing',
-          'Action item checklists and pro-tips for avoiding beginner mistakes',
-          'Breadboard-first prototyping guidelines'
-        ]
+        description: 'A beginner-friendly 6-phase mastercourse taking you from an initial idea to a finished physical build.',
+        bulletPoints: ['Structured milestones', 'Action item checklists', 'Breadboard prototyping tips']
       }
     ]);
 
-    // New DIY Project Lifecycle Mastercourse Content
     const lifecyclePhases = ref([
       {
         id: 1,
         title: 'Phase 1: Ideation & Feasibility Check',
         subtitle: 'Defining the goal and verifying what is physically possible',
         duration: '1-2 Days',
-        description: 'Before buying components, clearly define what problem your project solves and list the core inputs (sensors/buttons) and outputs (motors/displays) required.',
-        actions: [
-          'Write down a 2-sentence mission statement for the build.',
-          'Identify necessary inputs (e.g., button press, temperature sensor).',
-          'Identify necessary outputs (e.g., spinning a wheel, lighting an OLED screen).'
-        ],
-        proTip: 'Avoid "scope creep" on your first build. Keep your initial goal focused on a single function (e.g., turn on a fan when it gets warm).'
+        description: 'Clearly define what problem your project solves and list core inputs and outputs.',
+        actions: ['Write a 2-sentence mission statement.', 'Identify inputs (sensors, buttons).', 'Identify outputs (motors, screens).'],
+        proTip: 'Keep your first build focused on a single function.'
       },
       {
         id: 2,
         title: 'Phase 2: Architecture & Component Selection',
         subtitle: 'Choosing the microcontroller, sensors, and power source',
         duration: '2-3 Days',
-        description: 'Match your project requirements against microcontroller specifications. Pick components that run at compatible voltage levels (typically 3.3V or 5V).',
-        actions: [
-          'Select a primary microcontroller (e.g., ESP32 for Wi-Fi, Arduino Nano for basic 5V sensors).',
-          'Verify sensor communication protocols (I2C uses 2 pins, SPI uses 4 pins).',
-          'Calculate total current draw to select an appropriate power supply or battery.'
-        ],
-        proTip: 'Always buy 1 or 2 extra passive components (resistors, LEDs, jumpers). They are inexpensive and easy to damage by mistake.'
+        description: 'Match your project requirements against microcontroller specs and compatible voltage rails.',
+        actions: ['Select primary microcontroller.', 'Verify communication protocols (I2C/SPI).', 'Calculate total current draw.'],
+        proTip: 'Always buy extra passive components (resistors, LEDs) in case of accidental damage.'
       },
       {
         id: 3,
         title: 'Phase 3: Breadboarding & Schematic Design',
         subtitle: 'Solderless prototyping and wiring validation',
         duration: '3-5 Days',
-        description: 'Plug your parts into a solderless breadboard to test electrical connections before committing to permanent soldering.',
-        actions: [
-          'Connect power and ground rails across your breadboard.',
-          'Wire your microcontroller to inputs and outputs using jumper cables.',
-          'Double-check polarity on electrolytic capacitors and LEDs before powering on.'
-        ],
-        proTip: 'Never plug or unplug components on a breadboard while power is connected. Always disconnect USB/power first!'
+        description: 'Plug components into a solderless breadboard to test electrical connections.',
+        actions: ['Connect power and ground rails.', 'Wire inputs and outputs.', 'Double-check polarity before powering.'],
+        proTip: 'Never plug or unplug components while power is connected!'
       },
       {
         id: 4,
         title: 'Phase 4: Code & Firmware Development',
         subtitle: 'Writing logic and debugging via Serial output',
         duration: '4-7 Days',
-        description: 'Write microcontroller code using MicroPython, Arduino C++, or CircuitPython. Test individual sensors one by one before combining them into a single script.',
-        actions: [
-          'Test example code for each sensor individually.',
-          'Print diagnostic telemetry to the Web Serial terminal for live debugging.',
-          'Combine input triggers and output logic into a main loop.'
-        ],
-        proTip: 'Use `Serial.println()` liberally to inspect variable values in real-time.'
+        description: 'Write microcontroller code and test individual sensors one by one.',
+        actions: ['Test example code per sensor.', 'Print diagnostic telemetry to Web Serial.', 'Combine logic into main loop.'],
+        proTip: 'Use serial print statements liberally to inspect variable values.'
       },
       {
         id: 5,
         title: 'Phase 5: Assembly & Mechanical Integration',
         subtitle: 'Soldering, enclosures, and structural mounting',
         duration: '3-5 Days',
-        description: 'Transfer your breadboard design onto a perf board or custom PCB, and secure components inside a 3D printed or custom acrylic enclosure.',
-        actions: [
-          'Solder permanent connections onto perf boards or custom PCBs.',
-          'Mount switches, ports, and displays onto your enclosure walls.',
-          'Secure internal wiring using heat-shrink tubing and zip ties.'
-        ],
-        proTip: 'Leave extra wire length inside enclosures to make maintenance and debugging easier.'
+        description: 'Transfer your breadboard design onto a perf board or PCB and secure inside an enclosure.',
+        actions: ['Solder permanent connections.', 'Mount switches and ports.', 'Secure internal wiring.'],
+        proTip: 'Leave extra wire length inside enclosures for easier maintenance.'
       },
       {
         id: 6,
         title: 'Phase 6: Testing, Refinement & Documentation',
         subtitle: 'Stress testing, fixing edge cases, and logging notes',
         duration: 'Ongoing',
-        description: 'Run your device continuously to verify stability, clean up your source code repository, and record a final BOM in MakerOS.',
-        actions: [
-          'Perform a 24-hour continuous power run test.',
-          'Log final component prices and bin locations into your MakerOS workspace.',
-          'Export a shareable project report for your records.'
-        ],
-        proTip: 'Store your working code and schematics in a version control repo (e.g., GitHub) for easy recovery.'
+        description: 'Run your device continuously to verify stability and log your final BOM.',
+        actions: ['Perform 24-hour power run test.', 'Log final parts into MakerOS.', 'Export shareable report.'],
+        proTip: 'Store your working code in a version control repo like GitHub.'
       }
     ]);
 
-    // Enhanced Specific Hardware Lexicon
+    // Massively Expanded Text-Optimized Parts Lexicon (No Images)
     const lexiconSearch = ref('');
     const lexiconCategories = ref([
       {
         id: 'mcu',
-        title: 'Microcomputers & Microcontrollers',
+        title: 'Microcontrollers & Single-Board Computers',
         icon: 'cpu',
         isOpen: true,
-        overview: 'The computational cores of embedded systems. MCUs execute deterministic low-level firmware tasks, while SBCs manage full operating systems.',
-        howItWorks: 'Firmware executes in onboard flash memory. General Purpose Input/Output (GPIO) pins interface with peripherals using SPI, I2C, or UART protocols.',
+        overview: 'The computational cores of embedded systems. MCUs execute low-level firmware, while SBCs run full operating systems.',
+        howItWorks: 'Code runs in onboard flash memory. GPIO pins interface with peripherals using SPI, I2C, or UART protocols.',
         items: [
-          {
-            name: 'ESP32-S3 DevKit Module',
-            category: 'Microcontroller',
-            avgCost: '$6.50',
-            description: 'Dual-core 240MHz Xtensa processor featuring native Wi-Fi, BLE 5, and vector extension instructions for edge processing.',
-            bestFor: 'IoT telemetry gateways, wireless devices, and smart automation hardware.',
-            specs: '240MHz / 512KB SRAM / USB-OTG / 2.4GHz Wi-Fi',
-            image: 'https://images.unsplash.com/photo-1603732551681-2e9146399c15?auto=format&fit=crop&w=500&q=80'
-          },
-          {
-            name: 'Raspberry Pi Pico W',
-            category: 'Microcontroller',
-            avgCost: '$6.00',
-            description: 'RP2040 silicon board featuring dual ARM Cortex-M0+ cores and an integrated Infineon Wi-Fi/BLE chip.',
-            bestFor: 'MicroPython scripting, custom USB Human Interface Devices (HID), and educational IoT.',
-            specs: '133MHz / 264KB SRAM / Programmable I/O (PIO)',
-            image: 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=500&q=80'
-          }
+          { name: 'ESP32-S3 DevKit', category: 'Microcontroller', avgCost: '$6.50', description: 'Dual-core 240MHz Xtensa processor with native Wi-Fi and BLE 5.', bestFor: 'IoT gateways & wireless devices', specs: '240MHz / 512KB SRAM / USB-OTG' },
+          { name: 'Raspberry Pi Pico W', category: 'Microcontroller', avgCost: '$6.00', description: 'RP2040 dual-core ARM Cortex-M0+ with integrated wireless chip.', bestFor: 'MicroPython scripts & USB HID devices', specs: '133MHz / 264KB SRAM / PIO state machines' },
+          { name: 'Arduino Nano V3', category: 'Microcontroller', avgCost: '$4.00', description: 'Classic ATmega328P compact board for breadboard prototyping.', bestFor: 'Beginner robotics & 5V logic sensors', specs: '16MHz / 32KB Flash / 5V Logic' },
+          { name: 'Raspberry Pi 5 (8GB)', category: 'SBC', avgCost: '$80.00', description: 'High-performance Linux computer for heavy processing and machine vision.', bestFor: 'Edge AI servers & computer vision hubs', specs: 'Quad-core 2.4GHz ARM / 8GB LPDDR4' }
         ]
       },
       {
         id: 'passives',
-        title: 'Passive Components (Resistors & Capacitors)',
+        title: 'Passive Components (Resistors, Capacitors, Inductors)',
         icon: 'sliders',
         isOpen: false,
-        overview: 'Essential foundational elements that do not source power but shape voltage, limit current, filter noise, and stabilize power rails.',
-        howItWorks: 'Resistors restrict current flow following Ohm’s law (V=IR). Capacitors temporarily store and discharge electrostatic energy to smooth voltage ripple.',
+        overview: 'Foundational elements that shape voltage, limit current, filter noise, and store electrostatic energy.',
+        howItWorks: 'Resistors restrict current (V=IR). Capacitors smooth voltage ripples by temporarily storing charge.',
         items: [
-          {
-            name: 'Carbon Film Resistor Kit (1/4W, 10Ω - 1MΩ)',
-            category: 'Passive Component',
-            avgCost: '$7.00',
-            description: 'Standard through-hole axial resistors used for current limiting, pull-up/pull-down lines, and voltage division.',
-            bestFor: 'LED current limiting, transistor biasing, logic line default states.',
-            specs: '5% Tolerance / 0.25 Watt rating / Standard axial lead',
-            image: 'https://images.unsplash.com/photo-1593508512255-86ab42a8e620?auto=format&fit=crop&w=500&q=80'
-          },
-          {
-            name: 'Electrolytic & Ceramic Decoupling Capacitors',
-            category: 'Passive Component',
-            avgCost: '$5.50',
-            description: 'Energy storage cells placed across power input rails to filter out high-frequency electrical noise and transient voltage spikes.',
-            bestFor: 'Power supply filtering, motor noise suppression, timing oscillator circuits.',
-            specs: 'Values ranging from 22pF to 470uF / Various voltage ratings',
-            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=500&q=80'
-          }
+          { name: 'Carbon Film Resistor Kit (1/4W)', category: 'Passive', avgCost: '$7.00', description: 'Axial lead resistors for current limiting and pull-up/pull-down lines.', bestFor: 'LED current limiting & biasing transistors', specs: '5% Tolerance / 0.25W rating' },
+          { name: 'Electrolytic Capacitor Assortment', category: 'Passive', avgCost: '$5.50', description: 'Polarized energy storage cells used across power rails to filter noise.', bestFor: 'Power supply filtering & decoupling', specs: '10uF to 470uF / Various voltages' },
+          { name: 'Ceramic Disc Capacitors (100nF)', category: 'Passive', avgCost: '$3.00', description: 'Non-polarized capacitors for bypassing high-frequency noise to ground.', bestFor: 'Placing near IC power pins', specs: '50V rating / 100nF (0.1uF)' },
+          { name: 'Power Inductors (100uH)', category: 'Passive', avgCost: '$4.00', description: 'Wire-wound coils storing energy in a magnetic field when current changes.', bestFor: 'Switching regulators & LC filters', specs: '1.2A saturation current' }
+        ]
+      },
+      {
+        id: 'semiconductors',
+        title: 'Discrete Semiconductors (Diodes, Transistors, MOSFETs)',
+        icon: 'zap',
+        isOpen: false,
+        overview: 'Active semiconductor components that switch or amplify electrical signals and control power flow.',
+        howItWorks: 'Diodes permit current flow in one direction only. Transistors and MOSFETs act as electronic switches driven by gate/base voltages.',
+        items: [
+          { name: '1N4007 Rectifier Diodes (Pack of 50)', category: 'Semiconductor', avgCost: '$3.00', description: 'General-purpose silicon rectifier diodes protecting circuits from reverse polarity.', bestFor: 'Flyback suppression on inductive motor loads', specs: '1000V / 1A rating' },
+          { name: '2N2222 NPN Transistors (Pack of 25)', category: 'Semiconductor', avgCost: '$2.50', description: 'Standard switching transistors to drive higher-current loads from microcontrollers.', bestFor: 'Driving small relays, buzzers, and LEDs', specs: '800mA max collector current' },
+          { name: 'IRLZ44N Logic-Level MOSFET', category: 'Semiconductor', avgCost: '$1.50', description: 'Power MOSFET that switches fully open with 5V or 3.3V gate logic.', bestFor: 'PWM controlling DC motors and LED strips', specs: '55V / 47A max drain current' }
         ]
       },
       {
@@ -233,55 +166,39 @@ createApp({
         title: 'Wiring, Cables & Interconnects',
         icon: 'git-commit',
         isOpen: false,
-        overview: 'The physical nervous system connecting power supplies, data buses, shields, and peripheral modules together.',
-        howItWorks: 'Multi-strand copper conductors coated in flexible PVC/silicone insulation minimize resistance and mechanical fatigue during movement.',
+        overview: 'The physical nervous system connecting power supplies, data buses, and peripheral hardware.',
+        howItWorks: 'Multi-strand copper conductors coated in flexible insulation minimize resistance and mechanical stress.',
         items: [
-          {
-            name: 'Dupont Jumper Wire Bundle (Male-to-Female/Male-to-Male)',
-            category: 'Interconnect',
-            avgCost: '$4.00',
-            description: 'Flexible multi-colored ribbon wires with pre-crimped pin headers for quick breadboard and header pin interfacing.',
-            bestFor: 'Prototyping sensors, connecting breakout boards to microcontroller pins.',
-            specs: '20cm length / 40-pin ribbon / 2.54mm standard pitch',
-            image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=500&q=80'
-          },
-          {
-            name: 'USB-C to Data/Power Shielded Cable',
-            category: 'Cable',
-            avgCost: '$6.00',
-            description: 'Heavy-gauge shielded copper cable supporting high-speed serial data transmission and high-current power delivery.',
-            bestFor: 'Flashing microcontrollers, debugging via Web Serial, powering bench circuits.',
-            specs: 'USB 2.0/3.1 high-speed data pairs / Foil shield drain wire',
-            image: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=500&q=80'
-          }
+          { name: 'Dupont Jumper Wire Bundle (120 pcs)', category: 'Interconnect', avgCost: '$4.00', description: 'Flexible ribbon cables with pre-crimped pin headers for breadboards.', bestFor: 'Prototyping sensors & GPIO breakouts', specs: '20cm length / Male-Female-Male mixes' },
+          { name: 'Silicone Hook-Up Wire Reel Kit (22 AWG)', category: 'Interconnect', avgCost: '$12.00', description: 'Flexible stranded tinned copper wire with high-temp silicone insulation.', bestFor: 'Permanent wiring & custom harnesses', specs: '6 vibrant colors / 30ft total' },
+          { name: 'USB-C Shielded Data/Power Cable', category: 'Cable', avgCost: '$6.00', description: 'Heavy-gauge shielded copper cable supporting high-speed serial and power.', bestFor: 'Flashing MCUs & serial debugging', specs: 'USB 2.0 high-speed data pairs' },
+          { name: 'JST-PH 2.0mm Connector Kit', category: 'Interconnect', avgCost: '$7.50', description: 'Secure latching wire-to-board connectors preventing loose vibrations.', bestFor: 'LiPo battery plugs & module wiring', specs: '2-pin to 5-pin housings with crimps' }
         ]
       },
       {
         id: 'proto',
-        title: 'Prototyping Boards (Breadboards & PCBs)',
+        title: 'Prototyping Boards & PCBs',
         icon: 'grid',
         isOpen: false,
-        overview: 'Platforms used to build temporary or permanent electronic circuits without immediately fabricating custom circuit boards.',
-        howItWorks: 'Breadboards use internal spring-clip rows for solderless plug-and-play prototyping. Solder/perf boards and PCBs use copper traces to permanently connect soldered components.',
+        overview: 'Platforms used to build temporary or permanent electronic circuits without custom fabrication.',
+        howItWorks: 'Breadboards use internal spring clips for solderless connections. Perf boards and PCBs use copper traces.',
         items: [
-          {
-            name: 'Solderless Breadboard (830 Tie Points)',
-            category: 'Prototyping',
-            avgCost: '$3.50',
-            description: 'Reusable plastic block with internal interconnecting metal spring clips arranged in rows and power distribution rails.',
-            bestFor: 'Initial circuit layout, testing schematic behavior before soldering.',
-            specs: '830 tie points / Dual power rails / Adhesive foam backing',
-            image: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=500&q=80'
-          },
-          {
-            name: 'Double-Sided Prototype Perf Boards & Custom PCBs',
-            category: 'PCB',
-            avgCost: '$5.00',
-            description: 'FR4 fiberglass boards with plated through-holes allowing makers to solder components into permanent layouts.',
-            bestFor: 'Finalizing breadboard circuits into robust, permanent hardware modules.',
-            specs: 'FR4 material / 1.6mm thickness / 2.54mm grid hole spacing',
-            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=500&q=80'
-          }
+          { name: 'Solderless Breadboard (830 Tie Points)', category: 'Prototyping', avgCost: '$3.50', description: 'Reusable plastic block with internal spring clips and power rails.', bestFor: 'Initial circuit layout & testing', specs: '830 tie points / Adhesive backing' },
+          { name: 'Double-Sided Perf Board Assortment', category: 'PCB', avgCost: '$5.00', description: 'FR4 fiberglass boards with plated through-holes for permanent soldering.', bestFor: 'Transitioning breadboard projects to permanent builds', specs: '1.6mm thickness / 2.54mm grid' },
+          { name: 'Custom Aluminum PCB Heat Sink Plate', category: 'Thermal', avgCost: '$4.50', description: 'Thermal dissipation plate for high-power electronics and LED drivers.', bestFor: 'High-power MOSFETs and regulators', specs: 'Anodized finish / Pre-drilled' }
+        ]
+      },
+      {
+        id: 'power',
+        title: 'Power Supplies, Batteries & Regulation ICs',
+        icon: 'battery-charging',
+        isOpen: false,
+        overview: 'Components responsible for generating, regulating, and storing electrical energy safely.',
+        howItWorks: 'Linear or switching regulators step down higher voltages to stable 3.3V or 5V logic rails.',
+        items: [
+          { name: 'AMS117 3.3V Voltage Regulator Module', category: 'Power', avgCost: '$1.00', description: 'Step-down voltage regulator converting 5V inputs down to stable 3.3V.', bestFor: 'Powering ESP32/ESP8266 modules', specs: '800mA max output current' },
+          { name: 'TP4056 LiPo Battery Charger Board', category: 'Power', avgCost: '$0.80', description: 'Single-cell lithium battery charging module with micro-USB or USB-C input.', bestFor: 'Rechargeable portable project builds', specs: '1A max charge current with protection' },
+          { name: '18650 Rechargeable Li-Ion Cell (3.7V)', category: 'Battery', avgCost: '$5.00', description: 'High-capacity cylindrical lithium-ion battery for portable power.', bestFor: 'Robotics and handheld electronics', specs: '3000mAh / 3.7V nominal' }
         ]
       },
       {
@@ -289,27 +206,12 @@ createApp({
         title: 'Motors & Actuators',
         icon: 'activity',
         isOpen: false,
-        overview: 'Electromechanical devices that translate electrical currents into precise angular or linear mechanical work.',
-        howItWorks: 'Steppers energize internal electromagnetic stator coils sequentially to lock onto specific step increments; servos use internal feedback circuits to lock positions.',
+        overview: 'Electromechanical devices translating electrical currents into angular or linear motion.',
+        howItWorks: 'Steppers move in discrete angular steps; servos use internal feedback circuits to hold precise angles.',
         items: [
-          {
-            name: 'NEMA 17 Stepper Motor',
-            category: 'Actuator',
-            avgCost: '$14.00',
-            description: 'Hybrid bipolar stepper motor capable of high holding torque with precise 1.8-degree step increments.',
-            bestFor: '3D printers, CNC positioning stages, and automated linear actuators.',
-            specs: '1.8° Step Angle (200 steps/rev) / 1.2A rating',
-            image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=500&q=80'
-          },
-          {
-            name: 'SG90 Micro Servo (9g)',
-            category: 'Actuator',
-            avgCost: '$2.50',
-            description: 'Compact rotary actuator containing a DC motor, reduction gearbox, and control feedback potentiometer.',
-            bestFor: 'Robotic grippers, mechanism steering flaps, and camera pan/tilt brackets.',
-            specs: '1.8 kg/cm torque / 4.8V DC operating limit',
-            image: 'https://images.unsplash.com/photo-1563770660941-20978e870e26?auto=format&fit=crop&w=500&q=80'
-          }
+          { name: 'NEMA 17 Stepper Motor', category: 'Actuator', avgCost: '$14.00', description: 'Hybrid bipolar stepper motor with high holding torque.', bestFor: '3D printers & CNC positioning stages', specs: '1.8° step angle / 1.2A rating' },
+          { name: 'SG90 Micro Servo (9g)', category: 'Actuator', avgCost: '$2.50', description: 'Compact rotary actuator controlled via PWM pulses.', bestFor: 'Robotic grippers & camera pan/tilt', specs: '1.8 kg/cm torque / 4.8V limit' },
+          { name: 'TT Geared DC Motor (Dual Shaft)', category: 'Actuator', avgCost: '$2.00', description: 'Inexpensive gear motor widely used in small robotics platforms.', bestFor: 'Two-wheel drive robot chassis', specs: '1:48 gear ratio / 3V-6V operating' }
         ]
       },
       {
@@ -317,18 +219,12 @@ createApp({
         title: 'Sensors & Transducers',
         icon: 'gauge',
         isOpen: false,
-        overview: 'Transducers that capture environmental physical attributes and convert them into readable electrical signals.',
-        howItWorks: 'Internal sensing elements experience physical changes (e.g., capacitance or optical breaks) translated into digital data values.',
+        overview: 'Transducers that capture environmental attributes and convert them into readable electrical data.',
+        howItWorks: 'Sensing elements experience physical changes translated into digital data packets over I2C or SPI.',
         items: [
-          {
-            name: 'BME280 Environmental Sensor',
-            category: 'Sensor',
-            avgCost: '$5.00',
-            description: 'High-precision digital sensor measuring barometric pressure, ambient temperature, and humidity simultaneously.',
-            bestFor: 'Weather stations, indoor environmental trackers, and altitude logging.',
-            specs: 'I2C / SPI communication / Low current consumption',
-            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=500&q=80'
-          }
+          { name: 'BME280 Environmental Sensor', category: 'Sensor', avgCost: '$5.00', description: 'Digital sensor measuring barometric pressure, temperature, and humidity.', bestFor: 'Weather stations & indoor monitors', specs: 'I2C/SPI / Low power consumption' },
+          { name: 'HC-SR04 Ultrasonic Distance Sensor', category: 'Sensor', avgCost: '$1.50', description: 'Sonar echolocation sensor calculating distance to solid obstacles.', bestFor: 'Obstacle-avoiding robots', specs: '2cm to 400cm range / 5V TTL' },
+          { name: 'MPU6050 6-Axis Accelerometer/Gyro', category: 'Sensor', avgCost: '$3.00', description: 'Motion tracking chip measuring acceleration and rotational velocity.', bestFor: 'Self-balancing robots & tilt sensing', specs: 'I2C interface / 16-bit ADC' }
         ]
       }
     ]);
@@ -356,7 +252,7 @@ createApp({
         id: Date.now() + Math.random(),
         name: part.name,
         price: part.avgCost.replace('$', ''),
-        link: 'https://aliexpress.com'
+        link: 'https://www.adafruit.com'
       });
       alert(`Added "${part.name}" to your Shopping Wishlist!`);
     };
@@ -381,7 +277,6 @@ createApp({
       setTimeout(() => { demoCelebrationActive.value = false; }, 2500);
     };
 
-    // Web Serial state
     const serialConnected = ref(false);
     const serialLogs = ref([]);
     const serialInputText = ref('');
@@ -407,7 +302,7 @@ createApp({
     ]);
 
     const shoppingList = ref(JSON.parse(localStorage.getItem('maker_shopping')) || [
-      { id: 1, name: '2S 450mAh LiPo Battery', price: '12.50', link: 'https://aliexpress.com' }
+      { id: 1, name: '2S 450mAh LiPo Battery', price: '12.50', link: 'https://www.adafruit.com' }
     ]);
 
     const newProject = ref({ title: '', category: 'Robotics', targetBudget: null, description: '' });
@@ -418,7 +313,6 @@ createApp({
     watch(inventory, val => localStorage.setItem('maker_inventory', JSON.stringify(val)), { deep: true });
     watch(shoppingList, val => localStorage.setItem('maker_shopping', JSON.stringify(val)), { deep: true });
 
-    // Sidebar Resizer Handlers
     const startResize = (e) => {
       e.preventDefault();
       isResizing.value = true;
@@ -439,7 +333,6 @@ createApp({
       window.removeEventListener('mouseup', stopResize);
     };
 
-    // Web Serial Handlers
     const connectSerial = async () => {
       if (!('serial' in navigator)) {
         alert('Web Serial API is not supported in this browser.');
@@ -491,7 +384,6 @@ createApp({
       writer.releaseLock();
     };
 
-    // Report Generator
     const generateProjectReport = (project) => {
       const html = `
         <!DOCTYPE html>
@@ -514,7 +406,6 @@ createApp({
       window.open(url, '_blank');
     };
 
-    // Drag and Drop Pipeline Handlers
     const onDragStart = (proj) => { draggedProject.value = proj; };
     const onDrop = (targetStage) => {
       if (!draggedProject.value) return;
